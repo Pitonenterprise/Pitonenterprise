@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ProductForm } from "@/components/ProductForm";
+import { ImageUploader } from "@/components/ImageUploader";
 import type { Product } from "@/types";
 
 const EXAMPLES = [
@@ -80,27 +80,11 @@ export default function AICreatePage() {
             />
           </label>
 
-          <label className="block">
-            <span className="text-xs text-black/60 block mb-1">
-              Image URL (optional — AI will use it for vision if you provide one)
-            </span>
-            <input
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full px-4 py-2 rounded-lg border border-black/15 focus:border-[var(--brand)] focus:outline-none text-sm"
-            />
-            {imageUrl && (
-              <div className="mt-3 relative w-32 h-40 rounded-lg overflow-hidden bg-[var(--muted)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="preview"
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            )}
-          </label>
+          <ImageUploader
+            label="Product photo (optional — AI will use it for vision if you upload one)"
+            value={imageUrl}
+            onChange={setImageUrl}
+          />
 
           <div>
             <p className="text-xs text-black/55 mb-2">Try one of these examples:</p>
@@ -154,18 +138,6 @@ export default function AICreatePage() {
               Start over
             </button>
           </div>
-
-          {extracted.image_url && (
-            <div className="relative w-32 h-40 rounded-lg overflow-hidden bg-[var(--muted)]">
-              <Image
-                src={extracted.image_url}
-                alt="extracted"
-                fill
-                sizes="128px"
-                className="object-cover"
-              />
-            </div>
-          )}
 
           <ProductForm initial={extracted as Product} />
         </div>

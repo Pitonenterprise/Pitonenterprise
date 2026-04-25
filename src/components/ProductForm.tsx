@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/types";
 import { ALL_CATEGORIES, ALL_FABRICS, ALL_OCCASIONS } from "@/data/seed-products";
+import { ImageUploader } from "@/components/ImageUploader";
 
 const TRANSPARENCY_OPTIONS = ["", "sheer", "semi-sheer", "opaque"];
 const SEASON_OPTIONS = ["", "summer", "winter", "all-season"];
@@ -224,9 +225,11 @@ export function ProductForm({ initial }: { initial?: Product }) {
       </Section>
 
       <Section title="Media & status">
-        <Field label="Image URL">
-          <input value={form.image_url} onChange={(e) => update("image_url", e.target.value)} placeholder="https://…" className={input} />
-        </Field>
+        <ImageUploader
+          value={form.image_url}
+          onChange={(url) => update("image_url", url)}
+          label="Product photo"
+        />
         <Field label="Status">
           <select value={form.status} onChange={(e) => update("status", e.target.value as Product["status"])} className={input}>
             <option value="active">active</option>

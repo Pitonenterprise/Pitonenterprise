@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "cdn.shopify.com" },
+      // Supabase Storage public URLs for uploaded product images
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
 };

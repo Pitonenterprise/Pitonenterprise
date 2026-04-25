@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { OPENAI_API_KEY, OPENAI_MODEL } from "@/lib/config";
 import { isAdmin } from "@/lib/admin-auth";
+import { listAllProductsForAdmin } from "@/lib/store";
 import {
   ALL_CATEGORIES,
   ALL_FABRICS,
@@ -32,16 +33,27 @@ CORE RULES:
     – Bandhani → weave_region = "Kutch, Gujarat"
     – Tussar → weave_region = "Bhagalpur, Bihar"
     – Kalamkari → weave_region = "Srikalahasti, AP"
-- Write a polished customer-ready 2–4 sentence "description" in good English. Use saree terminology (pallu, zari, drape, blouse piece) where natural.
+- Write a polished customer-ready 2–4 sentence "description" in good English. Use saree terminology (pallu, zari, drape, blouse piece) where natural. Do NOT plagiarise any existing description in the catalog.
 - "fabric" MUST be one of: ${ALL_FABRICS.join(", ")}. Pick closest match.
 - "category" MUST be one of: ${ALL_CATEGORIES.join(", ")}. Choose based on price + occasion + style.
 - "occasion_tags" MUST come from: ${ALL_OCCASIONS.join(", ")}. 2–4 tags.
-- "slug" lowercase + hyphenated, derived from name.
 - "price_inr" / "mrp_inr" / "weight_grams": integers, no symbols/commas. If only one price is given, set price_inr to it and mrp_inr = 0.
 - "transparency": "sheer" | "semi-sheer" | "opaque" | "" (empty if unknown).
 - "work_type": array of decoration techniques actually mentioned. Common values: "Zari","Zardozi","Resham","Sequin","Mirror","Stone","Hand-painted","Block print","Embroidery","Print". Empty array if plain.
 - "is_handloom" / "silk_mark_certified": true ONLY if explicitly stated. Otherwise false.
-- "blouse_included": true unless explicitly stated otherwise (most sarees include unstitched blouse piece).`;
+- "blouse_included": true unless explicitly stated otherwise (most sarees include unstitched blouse piece).
+
+SEO NAMING RULES (CRITICAL — duplicate names hurt our search rankings):
+- The "name" MUST be UNIQUE — it cannot match (case-insensitive) or be a near-duplicate of any name in the AVOID-LIST provided in the user message.
+- Pattern: <Distinctive descriptor> <Color> <Fabric/Weave> Saree [<Occasion modifier>]
+  Good: "Royal Maroon Banarasi Silk Wedding Saree", "Pastel Pink Chanderi Office Saree"
+  Bad: "Maroon Saree", "Banarasi Saree", "Beautiful Saree" (too generic)
+- ALWAYS include the literal word "Saree" in the name (English buyers search for it; helps SERP relevance).
+- Front-load the most distinctive descriptor (specific shade, motif, or origin) — that's the long-tail keyword that drives ranking.
+- Length target: 40–70 characters. Hard ceiling 80.
+- Avoid generic stuffing: "Beautiful", "Stunning", "Latest", "Designer" — these are SEO-empty.
+- Use natural buyer phrasing — what a real customer would type into Google. e.g. "Crimson Patola Double Ikat Bridal Saree" beats "Saree Patola Crimson".
+- "slug": lowercase, hyphen-separated, derived from the name, MUST be unique against the AVOID-LIST slugs.`;
 
 export async function POST(req: Request) {
   if (!(await isAdmin())) {
@@ -70,10 +82,16 @@ export async function POST(req: Request) {
 
   const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
+  // Fetch existing names + slugs so the AI avoids duplicates (SEO).
+  const existing = await listAllProductsForAdmin();
+  const avoidList = existing
+    .map((p) => `- "${p.name}"  (slug: ${p.slug})`)
+    .join("\n");
+
   const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
     {
       type: "text",
-      text: `Admin notes about the saree:\n\n${parsed.data.text}\n\nExtract a structured listing. Leave any field empty (or 0/false/[]) when the input doesn't mention it.`,
+      text: `Admin notes about the saree:\n\n${parsed.data.text}\n\nAVOID-LIST — these names AND slugs already exist in our catalog. Your "name" and "slug" MUST be distinctly different from every entry below (case-insensitive). If your candidate is too close, vary the descriptor (different shade word, motif, occasion modifier, or origin town) until it is unique:\n\n${avoidList || "(catalog is empty — pick the strongest SEO name based on the input)"}\n\nExtract a structured listing. Leave any field empty (or 0/false/[]) when the input doesn't mention it.`,
     },
   ];
   if (parsed.data.image_url) {
@@ -192,6 +210,41 @@ export async function POST(req: Request) {
   if (parsed.data.image_url) {
     extracted.image_url = parsed.data.image_url;
   }
+
+  // Server-side uniqueness fallback: if the AI ignored the AVOID-LIST and
+  // returned a colliding name/slug, append a distinguishing modifier so we
+  // never write a duplicate (which would hurt SEO).
+  const existingNames = new Set(existing.map((p) => p.name.toLowerCase()));
+  const existingSlugs = new Set(existing.map((p) => p.slug.toLowerCase()));
+  let name = String(extracted.name || "").trim();
+
+  if (existingNames.has(name.toLowerCase())) {
+    const region = String(extracted.weave_region || "").split(",")[0].trim();
+    const motif = String(extracted.motif_pattern || "").trim();
+    const candidates = [
+      region && `${name} from ${region}`,
+      motif && `${name} with ${motif} Motifs`,
+    ].filter(Boolean) as string[];
+    name =
+      candidates.find((c) => !existingNames.has(c.toLowerCase())) || name;
+    let n = 2;
+    while (existingNames.has(name.toLowerCase())) {
+      name = `${name} (Edition ${n++})`;
+    }
+    extracted.name = name;
+  }
+
+  const baseSlug =
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "saree";
+  let finalSlug = baseSlug;
+  let s = 2;
+  while (existingSlugs.has(finalSlug.toLowerCase())) {
+    finalSlug = `${baseSlug}-${s++}`;
+  }
+  extracted.slug = finalSlug;
 
   return NextResponse.json({ listing: extracted });
 }

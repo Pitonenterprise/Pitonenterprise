@@ -102,8 +102,14 @@ create table if not exists chat_messages (
 create index if not exists chat_messages_session_idx on chat_messages(session_id);
 
 -- ============================================================
--- Seed: 12 sample sarees (run once after creating the table)
+-- (Schema only — no seed data. Add real products via the admin
+-- "✨ AI Create" flow at /admin/products/ai-create after deploy.)
 -- ============================================================
+
+-- Reference: legacy demo seed inserts (commented out — leave them
+-- here in case you want a quick demo populate; uncomment the whole
+-- block to seed 12 sample sarees).
+/*
 insert into products (
   id, slug, name, description, price_inr, fabric, color, category,
   occasion_tags, image_url, stock_quantity, status, weave_region,
@@ -193,6 +199,7 @@ insert into products (
     'https://images.unsplash.com/photo-1602810316498-ab67cf68c8e1?w=800&q=80',
     5,'active',null,true,5.5,'Dry clean only.')
 on conflict (id) do nothing;
+*/
 
 -- ============================================================
 -- Row Level Security (recommended for production — left disabled
