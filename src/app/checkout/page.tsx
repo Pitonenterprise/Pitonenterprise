@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/currency";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -27,7 +28,22 @@ export default function CheckoutPage() {
     country: "India",
   });
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    // Pre-fill name + email from logged-in user
+    void (async () => {
+      const { data } = await supabaseBrowser().auth.getUser();
+      const user = data.user;
+      if (!user) return;
+      setForm((f) => ({
+        ...f,
+        email: f.email || user.email || "",
+        name:
+          f.name ||
+          ((user.user_metadata?.full_name as string | undefined) || ""),
+      }));
+    })();
+  }, []);
 
   if (!mounted) return null;
 

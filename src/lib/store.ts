@@ -353,6 +353,7 @@ export async function createOrder(
       .from("orders")
       .insert({
         id: newOrder.id,
+        user_id: newOrder.user_id ?? null,
         customer_email: newOrder.customer_email,
         customer_name: newOrder.customer_name,
         customer_phone: newOrder.customer_phone ?? null,

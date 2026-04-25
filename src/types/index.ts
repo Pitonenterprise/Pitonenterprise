@@ -80,6 +80,7 @@ export type OrderStatus =
 
 export interface Order {
   id: string;
+  user_id?: string | null;
   customer_email: string;
   customer_name: string;
   customer_phone?: string;

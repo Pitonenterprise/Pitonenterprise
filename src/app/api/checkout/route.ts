@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createOrder, getProductById } from "@/lib/store";
 import { convertFromInr } from "@/lib/currency";
+import { getCurrentUser } from "@/lib/supabase-auth";
 import type { Currency, OrderItem } from "@/types";
 
 const Schema = z.object({
@@ -71,7 +72,10 @@ export async function POST(req: Request) {
     });
   }
 
+  const user = await getCurrentUser().catch(() => null);
+
   const order = await createOrder({
+    user_id: user?.id ?? null,
     customer_name,
     customer_email,
     customer_phone,

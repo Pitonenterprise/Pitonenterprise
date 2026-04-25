@@ -56,6 +56,7 @@ create index if not exists products_status_idx on products(status);
 -- ----------------- Orders -----------------
 create table if not exists orders (
   id                text primary key,
+  user_id           uuid references auth.users(id) on delete set null,
   customer_email    text not null,
   customer_name     text not null,
   customer_phone    text,
@@ -73,6 +74,7 @@ create table if not exists orders (
 );
 
 create index if not exists orders_email_idx on orders(customer_email);
+create index if not exists orders_user_idx on orders(user_id);
 create index if not exists orders_status_idx on orders(status);
 
 -- ----------------- Chat sessions -----------------
