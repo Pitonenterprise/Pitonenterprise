@@ -1,36 +1,149 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aaranya Sarees — Ecommerce + AI Saree Assistant
 
-## Getting Started
+A full-stack saree boutique built with **Next.js 16 (App Router) + TypeScript + Tailwind v4**, with a customer-facing **AI Saree Assistant** powered by **Claude Haiku 4.5** that searches live inventory, answers fabric questions, and escalates to WhatsApp.
 
-First, run the development server:
+Runs out-of-the-box in **DEMO mode** with 12 seeded sarees and an in-memory data store — no Supabase needed to try it. Swap in Supabase + a payment processor for production.
+
+---
+
+## Quick start
 
 ```bash
+npm install
+cp .env.local.example .env.local      # already created with sane demo defaults
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To enable the AI chatbot, add your Anthropic key to `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## What's in the box
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Surface | Path | Notes |
+|---|---|---|
+| Storefront homepage | `/` | Hero, featured + bridal grids, AI CTA |
+| Product catalog | `/products` | Filters: category, fabric, occasion |
+| Product detail | `/products/[slug]` | Image, specs, add-to-cart, related |
+| Cart | `/cart` | Persisted via localStorage (zustand) |
+| Checkout | `/checkout` | Form → `/api/checkout` → order created |
+| Order success | `/checkout/success` | Order summary |
+| Customer account | `/account` | Email lookup → order list |
+| Order tracking | `/account/orders/[id]` | Status timeline + items |
+| Admin dashboard | `/admin` | Stats, low-stock alerts, recent orders |
+| Admin products | `/admin/products` | List, create, edit, delete |
+| Admin orders | `/admin/orders` | List + status updates + tracking number |
+| Admin chats | `/admin/chats` | Read every chat session transcript |
+| About / Shipping / Returns | `/about` | Static content |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**API routes:** `/api/chat`, `/api/checkout`, `/api/orders`, `/api/admin/{login,logout,products,orders}`.
 
-## Deploy on Vercel
+**Admin password (demo):** `admin123` — set via `ADMIN_PASSWORD` in `.env.local`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## The AI Saree Assistant
+
+Floating chat widget on every page. Powered by Claude Haiku 4.5 with a domain-specific system prompt and four tools:
+
+- `search_products(category, fabric, color, occasion, min_price, max_price)` — live inventory search
+- `get_product_details(product_id)` — full spec for a recommended saree
+- `get_order_status(order_id, customer_email)` — order tracking with email verification
+- `escalate_to_human(reason, conversation_summary)` — generates a pre-filled WhatsApp deep link
+
+**Cost guards built in:**
+- Hard cap of **30 messages per session** (auto-escalates after)
+- Max **5 tool hops per turn** (prevents runaway tool loops)
+- `claude-haiku-4-5` model (cheapest + fast — feels great in chat)
+
+**Brand customization:** edit `src/lib/chat-prompt.ts` and `src/lib/config.ts`.
+
+---
+
+## Architecture
+
+### Data layer
+- **DEMO mode** (default): in-memory store at `src/lib/store.ts`, seeded from `src/data/seed-products.ts`. Survives within a single dev server process.
+- **Production:** the public surface of `src/lib/store.ts` matches the schema in `db/schema.sql`. Swap each function for a Supabase query — no callsite needs to change.
+
+### Cart
+- `src/lib/cart-store.ts` — zustand store, persisted to `localStorage` so guests retain their cart.
+
+### Currency
+- `src/lib/currency.ts` — supports INR, USD, GBP, AED, CAD, AUD, SGD via static FX rates. Replace with a live API call (e.g. open.er-api.com) for production.
+
+### Admin auth
+- Cookie-gated layout (`src/app/admin/layout.tsx`) with a single password from env. Replace with Supabase Auth + role check for production.
+
+---
+
+## Going to production
+
+1. **Provision Supabase** and run `db/schema.sql`.
+2. Set `DEMO_MODE=false` and fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+3. Replace functions in `src/lib/store.ts` with Supabase queries (the function signatures already match).
+4. Wire **Razorpay** (India) or **Stripe** (international) into `src/app/checkout/page.tsx` + `src/app/api/checkout/route.ts`.
+5. Replace email-lookup auth in `/account` with **Supabase Auth** (`@supabase/ssr` is already installed).
+6. Replace cookie-password admin auth with role-based Supabase Auth.
+7. Add **rate limiting** on `/api/chat` (10 messages/min per IP) and **chat session persistence** to the DB.
+8. Set `NEXT_PUBLIC_STORE_NAME` and `NEXT_PUBLIC_STORE_WHATSAPP` to your real brand + WhatsApp number.
+
+---
+
+## Project layout
+
+```
+src/
+  app/                       # Next.js routes
+    api/                       # checkout, orders, chat, admin
+    admin/                     # admin dashboard
+    products/[slug]/           # product detail
+    account/orders/[id]/       # order tracking
+  components/                # ProductCard, AddToCartButton, ChatWidget, ProductForm…
+  lib/
+    config.ts                  # env vars
+    store.ts                   # data store (demo) — swap for Supabase
+    cart-store.ts              # client-side cart (zustand)
+    currency.ts                # FX + price formatting
+    chat-prompt.ts             # Saree Assistant system prompt + tool schemas
+    chat-tools.ts              # server-side tool implementations
+    admin-auth.ts              # cookie-based admin auth
+  data/
+    seed-products.ts           # 12 sample sarees
+  types/                     # shared TS types
+db/
+  schema.sql                 # Postgres schema for Supabase
+```
+
+---
+
+## Smoke tests
+
+After `npm run dev`:
+
+```bash
+# Homepage
+curl http://localhost:3000/ | grep "Aaranya"
+
+# Place a test order
+curl -X POST http://localhost:3000/api/checkout \
+  -H "Content-Type: application/json" \
+  -d '{"customer_name":"Test","customer_email":"test@x.com",
+       "shipping_address":{"line1":"1 St","city":"Mumbai","state":"MH",
+       "postal_code":"400001","country":"India"},
+       "items":[{"product_id":"p_003","quantity":1}]}'
+
+# Look up by email
+curl "http://localhost:3000/api/orders?email=test@x.com"
+
+# Chat (requires ANTHROPIC_API_KEY in .env.local)
+curl -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Show me silk sarees under 20000"}'
+```

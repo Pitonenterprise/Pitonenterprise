@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fffaf6;
+  --foreground: #1c1410;
+  --brand: #8b1538;
+  --brand-dark: #5a0d24;
+  --brand-light: #f5e8ec;
+  --gold: #b88940;
+  --muted: #f3ede7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-light: var(--brand-light);
+  --color-gold: var(--gold);
+  --color-muted: var(--muted);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
+html, body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, Arial, sans-serif;
 }
+
+* { box-sizing: border-box; }
+
+.btn-primary {
+  background: var(--brand);
+  color: white;
+  padding: 0.7rem 1.4rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: background 0.15s;
+  display: inline-block;
+  text-align: center;
+}
+.btn-primary:hover { background: var(--brand-dark); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline {
+  border: 1.5px solid var(--brand);
+  color: var(--brand);
+  padding: 0.7rem 1.4rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.15s;
+  display: inline-block;
+  text-align: center;
+}
+.btn-outline:hover { background: var(--brand); color: white; }
+
+.serif {
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(139, 21, 56, 0.55); }
+  70% { box-shadow: 0 0 0 14px rgba(139, 21, 56, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 21, 56, 0); }
+}
+.chat-fab-pulse { animation: pulse-ring 2.4s infinite; }
