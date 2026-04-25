@@ -1,4 +1,4 @@
-# Aaranya Sarees — Ecommerce + AI Saree Assistant
+# Pitonenterprise — Ecommerce + AI Saree Assistant
 
 A full-stack saree boutique built with **Next.js 16 (App Router) + TypeScript + Tailwind v4**, with a customer-facing **AI Saree Assistant** powered by **OpenAI GPT-4o-mini** that searches live inventory, answers fabric questions, and escalates to WhatsApp.
 
@@ -129,7 +129,7 @@ After `npm run dev`:
 
 ```bash
 # Homepage
-curl http://localhost:3000/ | grep "Aaranya"
+curl http://localhost:3000/ | grep "Pitonenterprise"
 
 # Place a test order
 curl -X POST http://localhost:3000/api/checkout \

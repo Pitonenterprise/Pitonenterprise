@@ -1,5 +1,5 @@
 export const STORE_NAME =
-  process.env.NEXT_PUBLIC_STORE_NAME || "Aaranya Sarees";
+  process.env.NEXT_PUBLIC_STORE_NAME || "Pitonenterprise";
 
 export const STORE_WHATSAPP =
   process.env.NEXT_PUBLIC_STORE_WHATSAPP || "+919999999999";
