@@ -32,17 +32,34 @@ export interface Product {
   name: string;
   description: string;
   price_inr: number;
+  mrp_inr?: number;            // original MRP (shown struck-through if > price_inr)
   fabric: Fabric | string;
   color: string;
+  secondary_color?: string;     // border / pallu accent color
   category: Category | string;
   occasion_tags: string[];
   image_url: string;
   gallery_urls?: string[];
   stock_quantity: number;
   status: ProductStatus;
+  // Origin / authenticity
   weave_region?: string;
-  blouse_included?: boolean;
+  weaver_name?: string;
+  is_handloom?: boolean;
+  silk_mark_certified?: boolean;
+  // Construction / craft
+  weave_pattern?: string;       // Kadhua, Jamdani, Ikat, Brocade, Jacquard, etc.
+  work_type?: string[];         // Zari, Zardozi, Resham, Sequin, Mirror, Stone, Block-print, etc.
+  border_type?: string;         // broad / narrow / contrast / plain
+  motif_pattern?: string;       // floral, paisley, peacock, geometric, butis, etc.
+  transparency?: string;        // sheer / semi-sheer / opaque
+  // Dimensions
   length_meters?: number;
+  weight_grams?: number;
+  blouse_included?: boolean;
+  // Wearability
+  season?: string;              // summer / winter / all-season
+  // Care
   care?: string;
   created_at: string;
 }

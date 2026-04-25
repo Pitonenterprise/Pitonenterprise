@@ -9,9 +9,14 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="serif text-2xl">Products ({products.length})</h2>
-        <Link href="/admin/products/new" className="btn-primary">
-          + Add product
-        </Link>
+        <div className="flex gap-3">
+          <Link href="/admin/products/ai-create" className="btn-outline">
+            ✨ AI Create
+          </Link>
+          <Link href="/admin/products/new" className="btn-primary">
+            + Add manually
+          </Link>
+        </div>
       </div>
       <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
         <table className="w-full text-sm">
