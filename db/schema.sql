@@ -103,6 +103,16 @@ create table if not exists chat_messages (
 
 create index if not exists chat_messages_session_idx on chat_messages(session_id);
 
+-- ----------------- Wishlists -----------------
+create table if not exists wishlists (
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  product_id  text not null references products(id) on delete cascade,
+  added_at    timestamptz not null default now(),
+  primary key (user_id, product_id)
+);
+
+create index if not exists wishlists_user_idx on wishlists(user_id);
+
 -- ============================================================
 -- (Schema only — no seed data. Add real products via the admin
 -- "✨ AI Create" flow at /admin/products/ai-create after deploy.)

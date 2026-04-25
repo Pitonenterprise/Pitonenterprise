@@ -543,6 +543,59 @@ export async function appendMessage(
   return message;
 }
 
+// ============================================================
+// Wishlists  (DB-only — guests have no wishlist; sign in required)
+// ============================================================
+
+export async function listWishlistProducts(userId: string): Promise<Product[]> {
+  if (!useSupabase) return [];
+  const { data: rows, error } = await supabaseServer()
+    .from("wishlists")
+    .select("product_id, added_at, products(*)")
+    .eq("user_id", userId)
+    .order("added_at", { ascending: false });
+  if (error) throw error;
+  type Row = { product_id: string; products: Product | Product[] | null };
+  return (rows as unknown as Row[])
+    .map((r) => (Array.isArray(r.products) ? r.products[0] : r.products))
+    .filter((p): p is Product => Boolean(p));
+}
+
+export async function listWishlistIds(userId: string): Promise<string[]> {
+  if (!useSupabase) return [];
+  const { data, error } = await supabaseServer()
+    .from("wishlists")
+    .select("product_id")
+    .eq("user_id", userId);
+  if (error) throw error;
+  return (data || []).map((r: { product_id: string }) => r.product_id);
+}
+
+export async function addToWishlist(
+  userId: string,
+  productId: string,
+): Promise<void> {
+  if (!useSupabase) return;
+  await supabaseServer()
+    .from("wishlists")
+    .upsert(
+      { user_id: userId, product_id: productId },
+      { onConflict: "user_id,product_id" },
+    );
+}
+
+export async function removeFromWishlist(
+  userId: string,
+  productId: string,
+): Promise<void> {
+  if (!useSupabase) return;
+  await supabaseServer()
+    .from("wishlists")
+    .delete()
+    .eq("user_id", userId)
+    .eq("product_id", productId);
+}
+
 export async function markEscalated(sessionId: string): Promise<void> {
   if (useSupabase) {
     await supabaseServer()

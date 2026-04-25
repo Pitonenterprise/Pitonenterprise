@@ -5,6 +5,7 @@ import { getProductBySlug, listProducts } from "@/lib/store";
 import { formatPrice } from "@/lib/currency";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { ProductCard } from "@/components/ProductCard";
+import { WishlistButton } from "@/components/WishlistButton";
 
 export default async function ProductDetail(props: {
   params: Promise<{ slug: string }>;
@@ -103,8 +104,9 @@ export default async function ProductDetail(props: {
             ))}
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 space-y-3">
             <AddToCartButton product={product} />
+            <WishlistButton productId={product.id} variant="pill" />
           </div>
 
           <p className="mt-5 text-xs text-black/55 leading-relaxed">
