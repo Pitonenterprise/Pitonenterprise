@@ -14,7 +14,7 @@ export const SUPABASE_ANON_KEY =
 export const SUPABASE_SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
-export const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";

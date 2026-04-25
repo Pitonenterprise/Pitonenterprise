@@ -52,93 +52,94 @@ ESCALATE TO HUMAN WHEN:
 - Question you cannot confidently answer
 - Customer explicitly asks for human help`;
 
+// OpenAI function-calling schemas (chat.completions tools API).
 export const CHAT_TOOLS = [
   {
-    name: "search_products",
-    description:
-      "Search the live saree inventory by filters. Use this whenever recommending products. Returns up to 5 matches.",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        category: {
-          type: "string",
-          description:
-            "One of: bridal, reception, festive, party, office, casual",
-        },
-        fabric: {
-          type: "string",
-          description:
-            "Fabric type, e.g. 'Banarasi Silk', 'Kanjivaram Silk', 'Chanderi', 'Cotton', 'Georgette', 'Tussar Silk'",
-        },
-        color: {
-          type: "string",
-          description: "Color name, e.g. 'red', 'maroon', 'pink', 'green'",
-        },
-        occasion: {
-          type: "string",
-          description:
-            "Occasion tag, e.g. 'wedding', 'office', 'party', 'navratri'",
-        },
-        min_price: {
-          type: "number",
-          description: "Minimum price in INR",
-        },
-        max_price: {
-          type: "number",
-          description: "Maximum price in INR",
-        },
-        in_stock_only: {
-          type: "boolean",
-          description: "Default true",
+    type: "function" as const,
+    function: {
+      name: "search_products",
+      description:
+        "Search the live saree inventory by filters. Use this whenever recommending products. Returns up to 5 matches.",
+      parameters: {
+        type: "object",
+        properties: {
+          category: {
+            type: "string",
+            description:
+              "One of: bridal, reception, festive, party, office, casual",
+          },
+          fabric: {
+            type: "string",
+            description:
+              "Fabric type, e.g. 'Banarasi Silk', 'Kanjivaram Silk', 'Chanderi', 'Cotton', 'Georgette', 'Tussar Silk'",
+          },
+          color: {
+            type: "string",
+            description: "Color name, e.g. 'red', 'maroon', 'pink', 'green'",
+          },
+          occasion: {
+            type: "string",
+            description:
+              "Occasion tag, e.g. 'wedding', 'office', 'party', 'navratri'",
+          },
+          min_price: { type: "number", description: "Minimum price in INR" },
+          max_price: { type: "number", description: "Maximum price in INR" },
+          in_stock_only: { type: "boolean", description: "Default true" },
         },
       },
     },
   },
   {
-    name: "get_product_details",
-    description: "Get full details about a specific saree by product ID.",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        product_id: {
-          type: "string",
-          description: "The product ID, e.g. p_001",
+    type: "function" as const,
+    function: {
+      name: "get_product_details",
+      description: "Get full details about a specific saree by product ID.",
+      parameters: {
+        type: "object",
+        properties: {
+          product_id: {
+            type: "string",
+            description: "The product ID, e.g. p_001",
+          },
         },
+        required: ["product_id"],
       },
-      required: ["product_id"],
     },
   },
   {
-    name: "get_order_status",
-    description:
-      "Look up an order's current status. Customer must provide both order ID and the email used at checkout.",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        order_id: { type: "string" },
-        customer_email: { type: "string" },
+    type: "function" as const,
+    function: {
+      name: "get_order_status",
+      description:
+        "Look up an order's current status. Customer must provide both order ID and the email used at checkout.",
+      parameters: {
+        type: "object",
+        properties: {
+          order_id: { type: "string" },
+          customer_email: { type: "string" },
+        },
+        required: ["order_id", "customer_email"],
       },
-      required: ["order_id", "customer_email"],
     },
   },
   {
-    name: "escalate_to_human",
-    description:
-      "Hand off the conversation to a human agent on WhatsApp. Use when customer is upset, has a complaint, asks for human help, or you cannot confidently answer.",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        reason: {
-          type: "string",
-          description: "Short reason for escalation",
+    type: "function" as const,
+    function: {
+      name: "escalate_to_human",
+      description:
+        "Hand off the conversation to a human agent on WhatsApp. Use when customer is upset, has a complaint, asks for human help, or you cannot confidently answer.",
+      parameters: {
+        type: "object",
+        properties: {
+          reason: { type: "string", description: "Short reason for escalation" },
+          conversation_summary: {
+            type: "string",
+            description:
+              "1-3 sentence summary of what the customer needs, so the human can pick up quickly",
+          },
         },
-        conversation_summary: {
-          type: "string",
-          description:
-            "1-3 sentence summary of what the customer needs, so the human can pick up quickly",
-        },
+        required: ["reason", "conversation_summary"],
       },
-      required: ["reason", "conversation_summary"],
     },
   },
 ];

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { z } from "zod";
-import { ANTHROPIC_API_KEY, ANTHROPIC_MODEL } from "@/lib/config";
+import { OPENAI_API_KEY, OPENAI_MODEL } from "@/lib/config";
 import { CHAT_TOOLS, SAREE_SYSTEM_PROMPT } from "@/lib/chat-prompt";
 import { runTool } from "@/lib/chat-tools";
 import {
@@ -22,11 +22,11 @@ const MAX_MESSAGES_PER_SESSION = 30;
 const MAX_TOOL_HOPS = 5;
 
 export async function POST(req: Request) {
-  if (!ANTHROPIC_API_KEY) {
+  if (!OPENAI_API_KEY) {
     return NextResponse.json(
       {
         error:
-          "ANTHROPIC_API_KEY is not configured. Add it to .env.local to enable the chatbot.",
+          "OPENAI_API_KEY is not configured. Add it to .env.local to enable the chatbot.",
       },
       { status: 500 },
     );
@@ -57,67 +57,65 @@ export async function POST(req: Request) {
 
   appendMessage(session.id, { role: "user", content: parsed.data.message });
 
-  const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+  const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-  // Build Anthropic messages from history (skip system; that goes in `system`)
+  // Build OpenAI messages: system prompt, then user/assistant turns from history.
   const fullHistory = getMessages(session.id);
-  const messages: Anthropic.MessageParam[] = fullHistory
-    .filter((m) => m.role === "user" || m.role === "assistant")
-    .map((m) => ({
-      role: m.role as "user" | "assistant",
-      content: m.content,
-    }));
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    { role: "system", content: SAREE_SYSTEM_PROMPT },
+    ...fullHistory
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map(
+        (m) =>
+          ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          }) as OpenAI.Chat.Completions.ChatCompletionMessageParam,
+      ),
+  ];
 
   let recommendedIds: string[] = [];
   let escalateInfo: { whatsapp_url: string; reason: string } | undefined;
   let assistantText = "";
 
   for (let hop = 0; hop < MAX_TOOL_HOPS; hop++) {
-    const response = await client.messages.create({
-      model: ANTHROPIC_MODEL,
-      max_tokens: 1024,
-      system: SAREE_SYSTEM_PROMPT,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      tools: CHAT_TOOLS as any,
+    const response = await client.chat.completions.create({
+      model: OPENAI_MODEL,
       messages,
+      tools: CHAT_TOOLS,
+      max_tokens: 1024,
     });
 
-    // Collect text + tool_use blocks
-    const toolUses = response.content.filter(
-      (b): b is Anthropic.ToolUseBlock => b.type === "tool_use",
-    );
-    const textBlocks = response.content.filter(
-      (b): b is Anthropic.TextBlock => b.type === "text",
-    );
-    if (textBlocks.length) {
-      assistantText = textBlocks.map((b) => b.text).join("\n").trim();
-    }
+    const choice = response.choices[0];
+    const msg = choice.message;
 
-    if (response.stop_reason === "tool_use" && toolUses.length > 0) {
-      // Push assistant turn (with tool_use blocks)
-      messages.push({ role: "assistant", content: response.content });
+    if (msg.tool_calls && msg.tool_calls.length > 0) {
+      // Push the assistant turn that requested the tool calls
+      messages.push(msg);
 
-      // Run tools and build a single user turn with tool_results
-      const toolResultBlocks: Anthropic.ToolResultBlockParam[] = [];
-      for (const tu of toolUses) {
-        const tr = await runTool(
-          tu.name,
-          (tu.input as Record<string, unknown>) || {},
-          session.id,
-        );
+      // Execute each tool call, append a `tool` role message per call
+      for (const tc of msg.tool_calls) {
+        if (tc.type !== "function") continue;
+        let args: Record<string, unknown> = {};
+        try {
+          args = JSON.parse(tc.function.arguments || "{}");
+        } catch {
+          /* leave empty if model returned malformed JSON */
+        }
+        const tr = await runTool(tc.function.name, args, session.id);
         if (tr.product_ids) recommendedIds.push(...tr.product_ids);
         if (tr.escalate) escalateInfo = tr.escalate;
-        toolResultBlocks.push({
-          type: "tool_result",
-          tool_use_id: tu.id,
+        messages.push({
+          role: "tool",
+          tool_call_id: tc.id,
           content: JSON.stringify(tr.result),
         });
       }
-      messages.push({ role: "user", content: toolResultBlocks });
       continue;
     }
 
-    // Final answer reached
+    // No tool calls — final response reached
+    assistantText = (msg.content || "").trim();
     break;
   }
 
@@ -126,7 +124,6 @@ export async function POST(req: Request) {
       "Sorry — I had trouble formulating a response. Could you rephrase that, or would you like to talk to a human?";
   }
 
-  // De-dup recommendations
   recommendedIds = [...new Set(recommendedIds)];
   const recommendedProducts: Product[] = recommendedIds.length
     ? getProductsByIds(recommendedIds)

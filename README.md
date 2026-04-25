@@ -1,6 +1,6 @@
 # Aaranya Sarees — Ecommerce + AI Saree Assistant
 
-A full-stack saree boutique built with **Next.js 16 (App Router) + TypeScript + Tailwind v4**, with a customer-facing **AI Saree Assistant** powered by **Claude Haiku 4.5** that searches live inventory, answers fabric questions, and escalates to WhatsApp.
+A full-stack saree boutique built with **Next.js 16 (App Router) + TypeScript + Tailwind v4**, with a customer-facing **AI Saree Assistant** powered by **OpenAI GPT-4o-mini** that searches live inventory, answers fabric questions, and escalates to WhatsApp.
 
 Runs out-of-the-box in **DEMO mode** with 12 seeded sarees and an in-memory data store — no Supabase needed to try it. Swap in Supabase + a payment processor for production.
 
@@ -19,7 +19,7 @@ Open http://localhost:3000.
 To enable the AI chatbot, add your Anthropic key to `.env.local`:
 
 ```
-ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-ant-...
 ```
 
 ---
@@ -50,7 +50,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ## The AI Saree Assistant
 
-Floating chat widget on every page. Powered by Claude Haiku 4.5 with a domain-specific system prompt and four tools:
+Floating chat widget on every page. Powered by OpenAI GPT-4o-mini with a domain-specific system prompt and four tools:
 
 - `search_products(category, fabric, color, occasion, min_price, max_price)` — live inventory search
 - `get_product_details(product_id)` — full spec for a recommended saree
@@ -60,7 +60,7 @@ Floating chat widget on every page. Powered by Claude Haiku 4.5 with a domain-sp
 **Cost guards built in:**
 - Hard cap of **30 messages per session** (auto-escalates after)
 - Max **5 tool hops per turn** (prevents runaway tool loops)
-- `claude-haiku-4-5` model (cheapest + fast — feels great in chat)
+- `gpt-4o-mini` model (cheap + fast — feels great in chat); override via `OPENAI_MODEL` env var
 
 **Brand customization:** edit `src/lib/chat-prompt.ts` and `src/lib/config.ts`.
 
@@ -142,7 +142,7 @@ curl -X POST http://localhost:3000/api/checkout \
 # Look up by email
 curl "http://localhost:3000/api/orders?email=test@x.com"
 
-# Chat (requires ANTHROPIC_API_KEY in .env.local)
+# Chat (requires OPENAI_API_KEY in .env.local)
 curl -X POST http://localhost:3000/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"Show me silk sarees under 20000"}'
