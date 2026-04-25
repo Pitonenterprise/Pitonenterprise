@@ -1,7 +1,14 @@
 import { getMessages, listSessions } from "@/lib/store";
 
-export default function AdminChatsPage() {
-  const sessions = listSessions();
+export default async function AdminChatsPage() {
+  const sessions = await listSessions();
+  const sessionsWithMessages = await Promise.all(
+    sessions.map(async (s) => ({
+      session: s,
+      msgs: await getMessages(s.id),
+    })),
+  );
+
   return (
     <div>
       <h2 className="serif text-2xl mb-6">Chat sessions ({sessions.length})</h2>
@@ -12,8 +19,7 @@ export default function AdminChatsPage() {
         </p>
       ) : (
         <div className="space-y-4">
-          {sessions.map((s) => {
-            const msgs = getMessages(s.id);
+          {sessionsWithMessages.map(({ session: s, msgs }) => {
             const lastUserMsg = [...msgs].reverse().find((m) => m.role === "user");
             return (
               <div key={s.id} className="bg-white rounded-2xl border border-black/5 p-5">

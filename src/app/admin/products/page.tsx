@@ -3,8 +3,8 @@ import Link from "next/link";
 import { listAllProductsForAdmin } from "@/lib/store";
 import { formatPrice } from "@/lib/currency";
 
-export default function AdminProductsPage() {
-  const products = listAllProductsForAdmin();
+export default async function AdminProductsPage() {
+  const products = await listAllProductsForAdmin();
   return (
     <div>
       <div className="flex items-center justify-between mb-6">

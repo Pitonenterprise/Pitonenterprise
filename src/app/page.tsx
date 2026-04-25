@@ -4,9 +4,11 @@ import { listProducts } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
 import { STORE_NAME } from "@/lib/config";
 
-export default function Home() {
-  const featured = listProducts({ in_stock_only: true }).slice(0, 8);
-  const bridal = listProducts({ category: "bridal", in_stock_only: true }).slice(0, 4);
+export default async function Home() {
+  const all = await listProducts({ in_stock_only: true });
+  const featured = all.slice(0, 8);
+  const bridalAll = await listProducts({ category: "bridal", in_stock_only: true });
+  const bridal = bridalAll.slice(0, 4);
 
   return (
     <div>

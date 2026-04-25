@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   const orderItems: OrderItem[] = [];
   let totalInr = 0;
   for (const item of items) {
-    const product = getProductById(item.product_id);
+    const product = await getProductById(item.product_id);
     if (!product) {
       return NextResponse.json(
         { error: `Product not found: ${item.product_id}` },
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     });
   }
 
-  const order = createOrder({
+  const order = await createOrder({
     customer_name,
     customer_email,
     customer_phone,

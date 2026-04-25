@@ -7,5 +7,5 @@ export async function GET(req: Request) {
   if (!email) {
     return NextResponse.json({ error: "email required" }, { status: 400 });
   }
-  return NextResponse.json({ orders: listOrdersForCustomer(email) });
+  return NextResponse.json({ orders: await listOrdersForCustomer(email) });
 }

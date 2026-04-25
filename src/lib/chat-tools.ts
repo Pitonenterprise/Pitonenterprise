@@ -1,4 +1,4 @@
-// Server-side handlers for Claude tool calls in the saree chatbot.
+// Server-side handlers for OpenAI tool calls in the saree chatbot.
 
 import {
   getOrderById,
@@ -35,8 +35,8 @@ export async function runTool(
   }
 }
 
-function searchProducts(input: ToolInput): ToolResult {
-  const products = listProducts({
+async function searchProducts(input: ToolInput): Promise<ToolResult> {
+  const products = await listProducts({
     category: input.category as string | undefined,
     fabric: input.fabric as string | undefined,
     color: input.color as string | undefined,
@@ -64,9 +64,9 @@ function searchProducts(input: ToolInput): ToolResult {
   };
 }
 
-function getProductDetails(input: ToolInput): ToolResult {
+async function getProductDetails(input: ToolInput): Promise<ToolResult> {
   const id = input.product_id as string;
-  const product = getProductById(id);
+  const product = await getProductById(id);
   if (!product) return { result: { error: "Product not found" } };
   return {
     result: {
@@ -90,10 +90,10 @@ function getProductDetails(input: ToolInput): ToolResult {
   };
 }
 
-function getOrderStatus(input: ToolInput): ToolResult {
+async function getOrderStatus(input: ToolInput): Promise<ToolResult> {
   const orderId = (input.order_id as string)?.trim();
   const email = ((input.customer_email as string) || "").toLowerCase().trim();
-  const order = getOrderById(orderId);
+  const order = await getOrderById(orderId);
   if (!order || order.customer_email.toLowerCase() !== email) {
     return {
       result: {
@@ -118,10 +118,13 @@ function getOrderStatus(input: ToolInput): ToolResult {
   };
 }
 
-function escalateToHuman(input: ToolInput, sessionId: string): ToolResult {
+async function escalateToHuman(
+  input: ToolInput,
+  sessionId: string,
+): Promise<ToolResult> {
   const reason = (input.reason as string) || "Customer requested human help";
   const summary = (input.conversation_summary as string) || "";
-  markEscalated(sessionId);
+  await markEscalated(sessionId);
 
   const message = `Hi! I was just chatting with the Saree Assistant. ${summary}\n\n(Reason: ${reason})`;
   const number = STORE_WHATSAPP.replace(/[^\d]/g, "");

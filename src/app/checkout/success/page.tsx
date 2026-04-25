@@ -6,7 +6,7 @@ export default async function SuccessPage(props: {
   searchParams: Promise<{ order?: string }>;
 }) {
   const { order: orderId } = await props.searchParams;
-  const order = orderId ? getOrderById(orderId) : undefined;
+  const order = orderId ? await getOrderById(orderId) : undefined;
 
   return (
     <div className="max-w-2xl mx-auto px-5 sm:px-8 py-20 text-center">

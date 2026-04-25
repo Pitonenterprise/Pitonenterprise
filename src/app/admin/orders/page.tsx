@@ -2,8 +2,8 @@ import Link from "next/link";
 import { listOrders } from "@/lib/store";
 import { formatPrice } from "@/lib/currency";
 
-export default function AdminOrdersPage() {
-  const orders = listOrders();
+export default async function AdminOrdersPage() {
+  const orders = await listOrders();
   return (
     <div>
       <h2 className="serif text-2xl mb-6">Orders ({orders.length})</h2>

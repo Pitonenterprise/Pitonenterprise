@@ -8,7 +8,7 @@ export default async function OrderDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
-  const order = getOrderById(id);
+  const order = await getOrderById(id);
   if (!order) notFound();
 
   const steps: { key: string; label: string }[] = [

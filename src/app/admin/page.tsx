@@ -2,10 +2,12 @@ import Link from "next/link";
 import { listAllProductsForAdmin, listOrders, listSessions } from "@/lib/store";
 import { formatPrice } from "@/lib/currency";
 
-export default function AdminDashboard() {
-  const products = listAllProductsForAdmin();
-  const orders = listOrders();
-  const sessions = listSessions();
+export default async function AdminDashboard() {
+  const [products, orders, sessions] = await Promise.all([
+    listAllProductsForAdmin(),
+    listOrders(),
+    listSessions(),
+  ]);
 
   const totalRevenue = orders.reduce((s, o) => s + o.total_inr, 0);
   const lowStock = products.filter((p) => p.stock_quantity > 0 && p.stock_quantity <= 3);

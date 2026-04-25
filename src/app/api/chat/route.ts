@@ -43,8 +43,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
-  const session = getOrCreateSession(parsed.data.session_id, parsed.data.guest_id);
-  const history = getMessages(session.id);
+  const session = await getOrCreateSession(parsed.data.session_id, parsed.data.guest_id);
+  const history = await getMessages(session.id);
 
   if (history.length >= MAX_MESSAGES_PER_SESSION) {
     return NextResponse.json({
@@ -55,12 +55,12 @@ export async function POST(req: Request) {
     });
   }
 
-  appendMessage(session.id, { role: "user", content: parsed.data.message });
+  await appendMessage(session.id, { role: "user", content: parsed.data.message });
 
   const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
   // Build OpenAI messages: system prompt, then user/assistant turns from history.
-  const fullHistory = getMessages(session.id);
+  const fullHistory = await getMessages(session.id);
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: SAREE_SYSTEM_PROMPT },
     ...fullHistory
@@ -126,10 +126,10 @@ export async function POST(req: Request) {
 
   recommendedIds = [...new Set(recommendedIds)];
   const recommendedProducts: Product[] = recommendedIds.length
-    ? getProductsByIds(recommendedIds)
+    ? await getProductsByIds(recommendedIds)
     : [];
 
-  const stored: ChatMessage = appendMessage(session.id, {
+  const stored: ChatMessage = await appendMessage(session.id, {
     role: "assistant",
     content: assistantText,
     product_ids_recommended: recommendedIds,

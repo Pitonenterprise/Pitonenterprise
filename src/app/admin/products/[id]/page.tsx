@@ -6,7 +6,7 @@ export default async function EditProductPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
   if (!product) notFound();
   return (
     <div>

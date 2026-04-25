@@ -10,15 +10,14 @@ export default async function ProductDetail(props: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await props.params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const related = listProducts({
+  const relatedAll = await listProducts({
     category: product.category,
     in_stock_only: true,
-  })
-    .filter((p) => p.id !== product.id)
-    .slice(0, 4);
+  });
+  const related = relatedAll.filter((p) => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10">

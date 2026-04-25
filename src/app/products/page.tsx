@@ -17,7 +17,7 @@ export default async function ProductsPage(props: {
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await props.searchParams;
-  const products = listProducts({
+  const products = await listProducts({
     category: sp.category,
     fabric: sp.fabric,
     occasion: sp.occasion,

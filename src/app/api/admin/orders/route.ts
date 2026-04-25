@@ -12,7 +12,7 @@ export async function PATCH(req: Request) {
     status: OrderStatus;
     tracking_number?: string;
   };
-  const order = updateOrderStatus(id, status, tracking_number);
+  const order = await updateOrderStatus(id, status, tracking_number);
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ order });
 }
