@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import path from 'path'
+import { readFile } from 'fs/promises'
 import { getPayloadClient } from '@/lib/payload'
 import { generateProductListing, isAiEnabled } from '@/lib/ai'
 
@@ -32,15 +34,25 @@ export async function POST(req: Request) {
         id: body.mediaId,
         overrideAccess: true,
       })
-      if (media?.url) {
-        const origin = new URL(req.url).origin
-        const absolute = media.url.startsWith('http') ? media.url : `${origin}${media.url}`
-        const imgRes = await fetch(absolute)
-        if (imgRes.ok) {
-          const buf = Buffer.from(await imgRes.arrayBuffer())
-          const mime = media.mimeType || 'image/jpeg'
-          imageDataUrl = `data:${mime};base64,${buf.toString('base64')}`
+      if (media?.filename) {
+        const mime = media.mimeType || 'image/jpeg'
+        let buf: Buffer | undefined
+
+        if (media.url?.startsWith('http')) {
+          // Remote storage (e.g. Supabase): fetch over the network.
+          const imgRes = await fetch(media.url)
+          if (imgRes.ok) buf = Buffer.from(await imgRes.arrayBuffer())
+        } else {
+          // Local disk storage: read directly (avoids unreliable loopback HTTP).
+          const staticDir =
+            (payload.collections?.media?.config?.upload as any)?.staticDir || 'media'
+          const dir = path.isAbsolute(staticDir)
+            ? staticDir
+            : path.join(process.cwd(), staticDir)
+          buf = await readFile(path.join(dir, media.filename))
         }
+
+        if (buf) imageDataUrl = `data:${mime};base64,${buf.toString('base64')}`
       }
     } catch {
       // Non-fatal: fall back to notes-only generation.
