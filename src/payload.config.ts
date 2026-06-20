@@ -11,6 +11,7 @@ import { Categories } from './collections/Categories'
 import { Products } from './collections/Products'
 import { Customers } from './collections/Customers'
 import { Orders } from './collections/Orders'
+import { Messages } from './collections/Messages'
 import { Settings } from './globals/Settings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -26,7 +27,7 @@ export default buildConfig({
       titleSuffix: '— Pitonenterprise Admin',
     },
   },
-  collections: [Products, Categories, Orders, Customers, Media, Users],
+  collections: [Products, Categories, Orders, Customers, Messages, Media, Users],
   globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
