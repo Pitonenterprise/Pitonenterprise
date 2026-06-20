@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/components/providers/StoreProvider'
 import { useCurrency } from '@/components/providers/CurrencyProvider'
-import { formatINR } from '@/lib/format'
 import { isIndia, INDIA_SHIPPING_INR, INTERNATIONAL_SHIPPING_INR } from '@/lib/shipping'
 import { COUNTRIES } from '@/data/countries'
 import { AddressAutocomplete } from '@/components/AddressAutocomplete'
@@ -252,7 +251,7 @@ export default function CheckoutPage() {
           </dl>
           {currency !== 'INR' && (
             <p className="mt-2 text-[10px] leading-snug text-muted">
-              Prices shown in {currency}. Your card is charged in Indian Rupees ({formatINR(totalInr)}) at the current exchange rate.
+              Prices shown in {currency}. Your card is charged in Indian Rupees at the current exchange rate.
             </p>
           )}
           {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
