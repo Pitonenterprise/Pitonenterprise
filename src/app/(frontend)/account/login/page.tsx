@@ -3,9 +3,11 @@
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useStore } from '@/components/providers/StoreProvider'
 
 function LoginInner() {
   const router = useRouter()
+  const { refreshAccountSync } = useStore()
   const params = useSearchParams()
   const justVerified = params.get('verified') === '1'
   const [email, setEmail] = useState(params.get('email') || '')
@@ -39,6 +41,7 @@ function LoginInner() {
         }
         throw new Error('Invalid email or password')
       }
+      await refreshAccountSync() // merge account cart/wishlist into the session
       router.push('/account')
       router.refresh()
     } catch (err) {

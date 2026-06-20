@@ -1,11 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useStore } from './providers/StoreProvider'
 
 export function LogoutButton() {
   const router = useRouter()
+  const { detachAccount } = useStore()
   const logout = async () => {
     await fetch('/api/customers/logout', { method: 'POST', credentials: 'include' })
+    detachAccount() // stop syncing + clear local (it's saved in the account)
     router.push('/')
     router.refresh()
   }

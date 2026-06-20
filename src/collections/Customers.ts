@@ -81,5 +81,20 @@ export const Customers: CollectionConfig = {
       hasMany: true,
       admin: { description: 'Saved products.' },
     },
+    {
+      name: 'cart',
+      type: 'array',
+      admin: { description: 'Saved cart — synced across devices.' },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'product', type: 'relationship', relationTo: 'products', admin: { width: '60%' } },
+            { name: 'size', type: 'text', admin: { width: '20%' } },
+            { name: 'quantity', type: 'number', defaultValue: 1, min: 1, admin: { width: '20%' } },
+          ],
+        },
+      ],
+    },
   ],
 }

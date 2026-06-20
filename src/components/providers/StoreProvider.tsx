@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 export type CartItem = {
   productId: string | number
@@ -25,6 +25,9 @@ type StoreState = {
   cartCount: number
   cartSubtotal: number
   ready: boolean
+  // Account sync
+  refreshAccountSync: () => Promise<void>
+  detachAccount: () => void
 }
 
 const StoreContext = createContext<StoreState | null>(null)
@@ -36,10 +39,24 @@ function sameLine(a: CartItem, productId: string | number, size?: string | null)
   return a.productId === productId && (a.size ?? null) === (size ?? null)
 }
 
+// Merge two carts: union of lines, keeping the higher quantity per line (avoids
+// doubling on repeated logins). Account items win on metadata.
+function mergeCarts(local: CartItem[], account: CartItem[]): CartItem[] {
+  const out = [...account]
+  for (const li of local) {
+    const idx = out.findIndex((a) => sameLine(a, li.productId, li.size))
+    if (idx > -1) out[idx] = { ...out[idx], quantity: Math.max(out[idx].quantity, li.quantity) }
+    else out.push(li)
+  }
+  return out
+}
+
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [wishlist, setWishlist] = useState<(string | number)[]>([])
   const [ready, setReady] = useState(false)
+  const [authed, setAuthed] = useState(false)
+  const skipNextSave = useRef(false)
 
   // Hydrate from localStorage.
   useEffect(() => {
@@ -52,12 +69,70 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setReady(true)
   }, [])
 
+  // Persist to localStorage.
   useEffect(() => {
     if (ready) localStorage.setItem(CART_KEY, JSON.stringify(cart))
   }, [cart, ready])
   useEffect(() => {
     if (ready) localStorage.setItem(WISH_KEY, JSON.stringify(wishlist))
   }, [wishlist, ready])
+
+  // Pull the account cart/wishlist and merge with whatever is local.
+  const pullAndMerge = useCallback(async () => {
+    try {
+      const res = await fetch('/api/account/cart', { credentials: 'include' })
+      if (!res.ok) return
+      const data = await res.json()
+      setCart((prev) => mergeCarts(prev, (data.cart as CartItem[]) || []))
+      setWishlist((prev) => Array.from(new Set([...prev, ...((data.wishlist as (string | number)[]) || [])])))
+    } catch {}
+  }, [])
+
+  // Called by login/register pages on success.
+  const refreshAccountSync = useCallback(async () => {
+    try {
+      const me = await fetch('/api/customers/me', { credentials: 'include' }).then((r) => r.json())
+      if (me?.user) {
+        setAuthed(true)
+        await pullAndMerge()
+      }
+    } catch {}
+  }, [pullAndMerge])
+
+  // Called by logout: stop syncing and clear local state (it's safe in the account).
+  const detachAccount = useCallback(() => {
+    skipNextSave.current = true
+    setAuthed(false)
+    setCart([])
+    setWishlist([])
+  }, [])
+
+  // On first load, detect an existing session and sync.
+  useEffect(() => {
+    if (!ready) return
+    refreshAccountSync()
+  }, [ready, refreshAccountSync])
+
+  // Autosave to the account (debounced) whenever cart/wishlist changes while signed in.
+  useEffect(() => {
+    if (!ready || !authed) return
+    if (skipNextSave.current) {
+      skipNextSave.current = false
+      return
+    }
+    const t = setTimeout(() => {
+      fetch('/api/account/cart', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cart: cart.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
+          wishlist,
+        }),
+      }).catch(() => {})
+    }, 700)
+    return () => clearTimeout(t)
+  }, [cart, wishlist, authed, ready])
 
   const addToCart: StoreState['addToCart'] = useCallback((item, qty = 1) => {
     setCart((prev) => {
@@ -111,6 +186,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     cartCount,
     cartSubtotal,
     ready,
+    refreshAccountSync,
+    detachAccount,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
