@@ -64,32 +64,25 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Mobile: clean single hero image with badge */}
-          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm md:hidden">
-            {heroImages.length > 0 ? (
-              <HeroSlideshow images={heroImages} />
-            ) : (
-              <div className="h-full w-full" style={{ background: 'linear-gradient(150deg,#6e1f3b,#4a1228)' }} />
-            )}
-            <div className="absolute bottom-4 right-4 rounded-sm bg-background/95 px-4 py-3 text-center shadow-sm">
-              <div className="font-display text-xl text-wine">120+</div>
-              <div className="text-[9px] uppercase tracking-[2px] text-muted">Master weaves</div>
-            </div>
-          </div>
-
-          {/* Desktop: layered editorial composition */}
-          <div className="relative hidden h-[520px] md:block">
-            {heroImages.length > 0 ? (
-              <div className="absolute right-0 top-0 h-[78%] w-[62%]">
+          {/* Hero visual: clean full image on mobile, layered composition on desktop */}
+          <div className="relative aspect-[4/5] w-full md:aspect-auto md:h-[520px]">
+            {/* Image (fills on mobile; offset panel on desktop) */}
+            <div className="absolute inset-0 overflow-hidden rounded-sm md:inset-auto md:right-0 md:top-0 md:h-[78%] md:w-[62%]">
+              {heroImages.length > 0 ? (
                 <HeroSlideshow images={heroImages} />
-              </div>
-            ) : (
-              <div className="absolute right-0 top-0 h-[78%] w-[62%] rounded-sm" style={{ background: 'linear-gradient(150deg,#6e1f3b,#4a1228)' }} />
-            )}
-            <div className="absolute bottom-0 left-0 h-[62%] w-[52%] rounded-sm border-8 border-background" style={{ background: 'linear-gradient(150deg,#e8d7b8,#b68a3e)' }} />
-            <div className="absolute bottom-6 right-6 rounded-sm bg-background/95 px-5 py-4 text-center shadow-sm">
-              <div className="font-display text-2xl text-wine">120+</div>
-              <div className="text-[10px] uppercase tracking-[2px] text-muted">Master weaves</div>
+              ) : (
+                <div className="h-full w-full" style={{ background: 'linear-gradient(150deg,#6e1f3b,#4a1228)' }} />
+              )}
+            </div>
+            {/* Gold accent panel — desktop only */}
+            <div
+              className="absolute bottom-0 left-0 hidden h-[62%] w-[52%] rounded-sm border-8 border-background md:block"
+              style={{ background: 'linear-gradient(150deg,#e8d7b8,#b68a3e)' }}
+            />
+            {/* Badge */}
+            <div className="absolute bottom-4 right-4 rounded-sm bg-background/95 px-4 py-3 text-center shadow-sm md:bottom-6 md:right-6 md:px-5 md:py-4">
+              <div className="font-display text-xl text-wine md:text-2xl">120+</div>
+              <div className="text-[9px] uppercase tracking-[2px] text-muted md:text-[10px]">Master weaves</div>
             </div>
           </div>
         </div>
