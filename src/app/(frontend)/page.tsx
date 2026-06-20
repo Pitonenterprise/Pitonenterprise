@@ -1,28 +1,37 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { ProductCard } from '@/components/ProductCard'
+import { HeroSlideshow } from '@/components/HeroSlideshow'
 import { getCategories, getFeaturedByCategory } from '@/lib/queries'
 import { getPayloadClient } from '@/lib/payload'
 
 export const revalidate = 120 // ISR, fast, SEO-friendly catalog pages
 
-async function getHeroImage(): Promise<{ url: string; alt: string } | null> {
+type Slide = { url: string; alt: string }
+
+async function getHeroImages(): Promise<Slide[]> {
   try {
     const payload = await getPayloadClient()
     const settings: any = await payload.findGlobal({ slug: 'settings', depth: 1, overrideAccess: true })
-    const img = settings?.heroImage
-    if (img && typeof img === 'object' && img.url) {
-      return { url: img.url, alt: img.alt || 'Piton Enterprise' }
+    const rows: any[] = Array.isArray(settings?.heroImages) ? settings.heroImages : []
+    const slides = rows
+      .map((r) => r?.image)
+      .filter((img) => img && typeof img === 'object' && img.url)
+      .map((img) => ({ url: img.url as string, alt: (img.alt as string) || 'Piton Enterprise' }))
+    if (slides.length) return slides
+    // Fallback to the deprecated single hero image, if set.
+    const single = settings?.heroImage
+    if (single && typeof single === 'object' && single.url) {
+      return [{ url: single.url, alt: single.alt || 'Piton Enterprise' }]
     }
   } catch {}
-  return null
+  return []
 }
 
 export default async function Home() {
-  const [categories, sections, heroImage] = await Promise.all([
+  const [categories, sections, heroImages] = await Promise.all([
     getCategories(),
     getFeaturedByCategory(),
-    getHeroImage(),
+    getHeroImages(),
   ])
 
   return (
@@ -56,16 +65,9 @@ export default async function Home() {
           </div>
 
           <div className="relative h-[360px] md:h-[520px]">
-            {heroImage ? (
-              <div className="absolute right-0 top-0 h-[78%] w-[62%] overflow-hidden rounded-sm">
-                <Image
-                  src={heroImage.url}
-                  alt={heroImage.alt}
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 62vw, 400px"
-                  className="object-cover"
-                />
+            {heroImages.length > 0 ? (
+              <div className="absolute right-0 top-0 h-[78%] w-[62%]">
+                <HeroSlideshow images={heroImages} />
               </div>
             ) : (
               <div className="absolute right-0 top-0 h-[78%] w-[62%] rounded-sm" style={{ background: 'linear-gradient(150deg,#6e1f3b,#4a1228)' }} />

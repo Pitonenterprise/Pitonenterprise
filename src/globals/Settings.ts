@@ -10,10 +10,21 @@ export const Settings: GlobalConfig = {
   },
   fields: [
     {
+      name: 'heroImages',
+      type: 'array',
+      label: 'Hero Images (slideshow)',
+      admin: {
+        description: 'Upload 10-15 images. They crossfade every 2 seconds in the homepage hero box. Portrait (3:4) works best.',
+      },
+      fields: [{ name: 'image', type: 'upload', relationTo: 'media', required: true }],
+    },
+    // Deprecated single hero image — kept (hidden) only to preserve the DB column and
+    // avoid a destructive schema change. Use "Hero Images" above instead.
+    {
       name: 'heroImage',
       type: 'upload',
       relationTo: 'media',
-      admin: { description: 'Homepage hero image (right-side box). Portrait works best (3:4).' },
+      admin: { hidden: true },
     },
     {
       type: 'row',
