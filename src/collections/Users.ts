@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-// Admin/staff users — Payload's built-in auth powers the /admin login.
+// Admin/staff users, Payload's built-in auth powers the /admin login.
 export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,

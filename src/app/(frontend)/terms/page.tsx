@@ -26,8 +26,8 @@ export default function TermsPage() {
       <h2>Orders</h2>
       <p>
         Placing an order is an offer to buy. We confirm orders by email, and we reserve the right
-        to decline or cancel an order — for example if an item is out of stock or pricing was
-        listed in error — in which case any payment taken is refunded.
+        to decline or cancel an order, for example if an item is out of stock or pricing was
+        listed in error, in which case any payment taken is refunded.
       </p>
 
       <h2>Payment</h2>
@@ -51,7 +51,7 @@ export default function TermsPage() {
 
       <h2>Intellectual property</h2>
       <p>
-        All content on this site — including images, text, logos, and designs — belongs to Piton
+        All content on this site, including images, text, logos, and designs, belongs to Piton
         Enterprise or its licensors and may not be used without permission.
       </p>
 

@@ -1,4 +1,4 @@
-/* THIS FILE WAS GENERATED FOR PAYLOAD — the admin panel's root layout.
+/* THIS FILE WAS GENERATED FOR PAYLOAD, the admin panel's root layout.
  * It provides its own <html>/<body>, separate from the storefront layout. */
 import type { ServerFunctionClient } from 'payload'
 import config from '@payload-config'

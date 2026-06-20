@@ -5,7 +5,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { StoreProvider } from '@/components/providers/StoreProvider'
 
-// Design system fonts — Marcellus (display serif) + Jost (body sans).
+// Design system fonts, Marcellus (display serif) + Jost (body sans).
 const marcellus = Marcellus({
   variable: '--font-display',
   subsets: ['latin'],
@@ -26,8 +26,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${storeName} — Handcrafted Sarees, Kurtis & Lehengas`,
-    template: `%s — ${storeName}`,
+    default: `${storeName}, Handcrafted Sarees, Kurtis & Lehengas`,
+    template: `%s, ${storeName}`,
   },
   description:
     'Discover handcrafted sarees, kurtis, lehengas and western wear. Worldwide shipping, premium fabrics, timeless designs.',

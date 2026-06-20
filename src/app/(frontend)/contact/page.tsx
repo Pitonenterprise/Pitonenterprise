@@ -7,7 +7,7 @@ export const revalidate = 300
 export const metadata: Metadata = {
   title: 'Contact Us',
   description:
-    'Get in touch with Piton Enterprise — questions about our handcrafted sarees, kurtis and lehengas, orders, or visiting our shop.',
+    'Get in touch with Piton Enterprise, questions about our handcrafted sarees, kurtis and lehengas, orders, or visiting our shop.',
   alternates: { canonical: '/contact' },
 }
 
@@ -31,7 +31,7 @@ export default async function ContactPage() {
         <p className="text-[11px] uppercase tracking-[4px] text-gold">Contact Us</p>
         <h1 className="mt-4 font-display text-5xl text-foreground">We&apos;d love to hear from you</h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-foreground/70">
-          Questions about a piece, your order, custom work, or visiting our shop — send us a note
+          Questions about a piece, your order, custom work, or visiting our shop, send us a note
           and our team will reply soon.
         </p>
       </header>
@@ -68,7 +68,7 @@ export default async function ContactPage() {
           <div>
             <h2 className="text-[11px] uppercase tracking-[3px] text-gold">Hours</h2>
             <p className="mt-2 text-sm leading-relaxed text-foreground/70">
-              Mon – Sat · 10am – 7pm
+              Mon-Sat · 10am-7pm
             </p>
           </div>
         </aside>

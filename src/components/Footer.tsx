@@ -64,7 +64,7 @@ export function Footer() {
           <div className="font-display text-2xl text-white">Piton</div>
           <div className="mt-1 text-[9.5px] uppercase tracking-[5px] text-gold">Enterprise</div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-gold-soft/60">
-            Handcrafted sarees, kurtis & lehengas — woven for women everywhere.
+            Handcrafted sarees, kurtis & lehengas, woven for women everywhere.
           </p>
         </div>
         {COLUMNS.map((col) => (

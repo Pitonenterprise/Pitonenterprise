@@ -20,11 +20,11 @@ export default function PrivacyPage() {
 
       <h2>Information we collect</h2>
       <ul>
-        <li><strong>Account details</strong> — your name, email, and password when you register.</li>
-        <li><strong>Order details</strong> — items ordered, shipping and billing address, and contact number.</li>
-        <li><strong>Payment information</strong> — processed securely by our payment providers; we do not store your full card details.</li>
-        <li><strong>Communications</strong> — messages you send us through forms or email.</li>
-        <li><strong>Usage data</strong> — basic information your browser shares, such as device and pages viewed, to help the site work and improve.</li>
+        <li><strong>Account details</strong>, your name, email, and password when you register.</li>
+        <li><strong>Order details</strong>, items ordered, shipping and billing address, and contact number.</li>
+        <li><strong>Payment information</strong>, processed securely by our payment providers; we do not store your full card details.</li>
+        <li><strong>Communications</strong>, messages you send us through forms or email.</li>
+        <li><strong>Usage data</strong>, basic information your browser shares, such as device and pages viewed, to help the site work and improve.</li>
       </ul>
 
       <h2>How we use your information</h2>

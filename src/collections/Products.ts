@@ -96,7 +96,7 @@ export const Products: CollectionConfig = {
       min: 0,
       admin: { position: 'sidebar', description: 'Total stock (used when no sizes).' },
     },
-    // Attributes — power filtering + SEO content.
+    // Attributes, power filtering + SEO content.
     {
       type: 'collapsible',
       label: 'Attributes',

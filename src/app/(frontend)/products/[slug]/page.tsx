@@ -18,7 +18,7 @@ export async function generateMetadata({
   const { slug } = await params
   const product = await getProductBySlug(slug)
   if (!product) return {}
-  const desc = `${product.title}${product.fabric ? ` in ${product.fabric}` : ''} — handcrafted, shipped worldwide by Piton Enterprise.`
+  const desc = `${product.title}${product.fabric ? ` in ${product.fabric}` : ''}, handcrafted, shipped worldwide by Piton Enterprise.`
   return {
     title: product.title,
     description: desc,

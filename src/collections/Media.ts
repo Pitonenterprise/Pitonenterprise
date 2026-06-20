@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 // Uploaded media (product images, etc.). Stored locally for now; a Supabase Storage
-// (S3-compatible) adapter will be wired in a later phase — see Doc/DATA_MODEL.md.
+// (S3-compatible) adapter will be wired in a later phase, see Doc/DATA_MODEL.md.
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {

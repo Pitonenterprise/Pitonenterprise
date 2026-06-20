@@ -4,7 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Our Story',
   description:
-    'Since 2006, Piton Enterprise has grown from a single artisan to a team of 50 skilled workers, with its own manufacturing unit and retail shop — handcrafting sarees, kurtis and lehengas.',
+    'Since 2006, Piton Enterprise has grown from a single artisan to a team of 50 skilled workers, with its own manufacturing unit and retail shop, handcrafting sarees, kurtis and lehengas.',
   alternates: { canonical: '/about' },
 }
 
@@ -27,7 +27,7 @@ export default function AboutPage() {
           </h1>
           <p className="mt-6 text-[16px] leading-relaxed text-foreground/70">
             What began in 2006 as the work of a single pair of hands has become a house of
-            craft — fifty skilled artisans, one dedicated manufacturing unit, and a shop where
+            craft, fifty skilled artisans, one dedicated manufacturing unit, and a shop where
             our pieces come to life for the women who wear them.
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function AboutPage() {
           <div>
             <h2 className="font-display text-3xl text-foreground">A beginning in 2006</h2>
             <p className="mt-4 leading-[1.9] text-foreground/75">
-              Piton Enterprise started in 2006 with a single employee and a simple belief — that
+              Piton Enterprise started in 2006 with a single employee and a simple belief, that
               a beautifully made garment carries the warmth of the hands that made it. In those
               early days, every saree was cut, finished and inspected by one person who cared
               about getting it right.
@@ -62,8 +62,8 @@ export default function AboutPage() {
             <h2 className="font-display text-3xl text-foreground">From one to fifty</h2>
             <p className="mt-4 leading-[1.9] text-foreground/75">
               That care drew others to the craft. Over the years our small workshop became a
-              team of fifty skilled workers — pattern makers, weavers, embroiderers and
-              finishers — each adding their own mastery to the pieces that leave our doors.
+              team of fifty skilled workers, pattern makers, weavers, embroiderers and
+              finishers, each adding their own mastery to the pieces that leave our doors.
               Growth never changed the standard: every order still passes through hands that
               take pride in it.
             </p>
@@ -74,7 +74,7 @@ export default function AboutPage() {
             <p className="mt-4 leading-[1.9] text-foreground/75">
               Today we work from our own manufacturing unit, with a retail shop where customers
               can see and feel the quality up close. From that single unit and shop, we now ship
-              handcrafted sarees, kurtis and lehengas to women around the world — carrying a
+              handcrafted sarees, kurtis and lehengas to women around the world, carrying a
               little of where we came from into everything we make.
             </p>
           </div>

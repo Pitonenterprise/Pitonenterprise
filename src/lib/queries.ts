@@ -83,7 +83,7 @@ function mapCategory(doc: Record<string, any>): StoreCategory {
 }
 
 // cache() dedupes identical calls within a single request (e.g. generateMetadata
-// + the page component) so each page hits the DB once, not 2–3×.
+// + the page component) so each page hits the DB once, not 2-3×.
 export const getCategories = cache(async (): Promise<StoreCategory[]> => {
   const payload = await getPayloadClient()
   const res = await payload.find({

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ProductCard } from '@/components/ProductCard'
 import { getCategories, getFeaturedByCategory } from '@/lib/queries'
 
-export const revalidate = 120 // ISR — fast, SEO-friendly catalog pages
+export const revalidate = 120 // ISR, fast, SEO-friendly catalog pages
 
 export default async function Home() {
   const [categories, sections] = await Promise.all([getCategories(), getFeaturedByCategory()])
@@ -19,8 +19,7 @@ export default async function Home() {
               <span className="text-wine">woven for today</span>
             </h1>
             <p className="mt-6 max-w-md text-[15px] leading-relaxed text-foreground/70">
-              Handcrafted sarees, kurtis and lehengas from India&apos;s finest weavers —
-              shipped, with love, anywhere in the world.
+              Handcrafted sarees, kurtis and lehengas from India&apos;s finest weavers,               shipped, with love, anywhere in the world.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link

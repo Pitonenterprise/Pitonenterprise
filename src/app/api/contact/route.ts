@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
   const payload = await getPayloadClient()
 
-  // Save first — durable even if email fails.
+  // Save first, durable even if email fails.
   await payload.create({
     collection: 'messages',
     overrideAccess: true,
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   const to = settings?.supportEmail || FALLBACK_TO
   await sendEmail({
     to,
-    subject: `New enquiry${subject ? `: ${subject}` : ''} — from ${name}`,
+    subject: `New enquiry${subject ? `: ${subject}` : ''}, from ${name}`,
     html: `
       <div style="font-family:Arial,sans-serif;color:#2a2320">
         <h2 style="color:#6e1f3b">New contact message</h2>

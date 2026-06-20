@@ -1,5 +1,5 @@
 // Currency + price formatting. Prices are stored in a base currency (USD) and
-// converted/formatted per the visitor's currency — see Doc/I18N.md.
+// converted/formatted per the visitor's currency, see Doc/I18N.md.
 
 // Static FX rates (relative to USD). Replace with a live FX source in a later phase.
 export const FX_RATES: Record<string, number> = {

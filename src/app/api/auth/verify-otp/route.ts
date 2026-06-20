@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Incorrect code. Please try again.' }, { status: 400 })
   }
 
-  // Success — mark verified, clear OTP state.
+  // Success, mark verified, clear OTP state.
   await payload.update({
     collection: 'customers',
     id: customer.id,

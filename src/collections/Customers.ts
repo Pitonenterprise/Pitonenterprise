@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { isAdmin, isAdminOrCustomerSelf } from '../access'
 
-// Storefront customer accounts — separate auth from admin `users`.
+// Storefront customer accounts, separate auth from admin `users`.
 // Email OTP verification: accounts start unverified and cannot sign in until they
 // confirm a 6-digit code (see src/app/api/auth/*). Code is stored hashed.
 export const Customers: CollectionConfig = {
@@ -37,7 +37,7 @@ export const Customers: CollectionConfig = {
       defaultValue: false,
       admin: { position: 'sidebar', description: 'Email confirmed via OTP.' },
     },
-    // OTP state — server-managed, hidden from the admin UI.
+    // OTP state, server-managed, hidden from the admin UI.
     { name: 'otpHash', type: 'text', admin: { hidden: true } },
     { name: 'otpExpiresAt', type: 'date', admin: { hidden: true } },
     { name: 'otpAttempts', type: 'number', defaultValue: 0, admin: { hidden: true } },
@@ -84,7 +84,7 @@ export const Customers: CollectionConfig = {
     {
       name: 'cart',
       type: 'array',
-      admin: { description: 'Saved cart — synced across devices.' },
+      admin: { description: 'Saved cart, synced across devices.' },
       fields: [
         {
           type: 'row',

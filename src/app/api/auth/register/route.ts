@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
   try {
     if (found) {
-      // Unverified account exists — update credentials + new OTP.
+      // Unverified account exists, update credentials + new OTP.
       await payload.update({
         collection: 'customers',
         id: found.id,

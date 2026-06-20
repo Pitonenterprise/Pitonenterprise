@@ -76,7 +76,7 @@ function VerifyInner() {
     })
     const data = await res.json().catch(() => ({}))
     setCooldown(30)
-    setInfo(data.emailConsoleOnly ? 'New code generated (check the server console — dev mode).' : 'A new code is on its way.')
+    setInfo(data.emailConsoleOnly ? 'New code generated (check the server console, dev mode).' : 'A new code is on its way.')
   }
 
   return (
@@ -87,7 +87,7 @@ function VerifyInner() {
       </p>
       {devMode && (
         <p className="mt-2 rounded-sm bg-gold-soft/40 px-3 py-2 text-xs text-wine">
-          Dev mode: no email service configured yet — the code is printed in the server console.
+          Dev mode: no email service configured yet, the code is printed in the server console.
         </p>
       )}
 

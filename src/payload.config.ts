@@ -24,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     meta: {
-      titleSuffix: '— Pitonenterprise Admin',
+      titleSuffix: ', Pitonenterprise Admin',
     },
   },
   collections: [Products, Categories, Orders, Customers, Messages, Media, Users],
@@ -45,7 +45,7 @@ export default buildConfig({
     },
     // Schema is managed explicitly (already synced). Disabling dev `push` avoids
     // repeated, connection-heavy introspection on every init. To change the schema:
-    // temporarily set `push: true`, restart to sync, then set back — or use migrations.
+    // temporarily set `push: true`, restart to sync, then set back, or use migrations.
     push: false,
   }),
   // Localized content for multi-language store (see Doc/I18N.md).

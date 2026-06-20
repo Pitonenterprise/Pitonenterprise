@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   const payload = await getPayloadClient()
 
-  // Recompute prices from the DB — never trust client-sent prices.
+  // Recompute prices from the DB, never trust client-sent prices.
   const ids = items.map((i) => i.productId)
   const found = await payload.find({
     collection: 'products',

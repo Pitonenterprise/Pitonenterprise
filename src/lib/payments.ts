@@ -1,4 +1,4 @@
-// Payment gateway helpers. Both providers are OPTIONAL — they activate only when
+// Payment gateway helpers. Both providers are OPTIONAL, they activate only when
 // their env keys are present, so the store runs (with Pay-on-Delivery) without them.
 // See Doc/PAYMENTS.md.
 

@@ -9,7 +9,7 @@ import type { PaymentMethod } from '@/lib/payments'
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
   stripe: 'Card / Wallet (Stripe)',
-  razorpay: 'UPI / Card — India (Razorpay)',
+  razorpay: 'UPI / Card, India (Razorpay)',
   cod: 'Pay on Delivery',
 }
 

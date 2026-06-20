@@ -17,7 +17,7 @@ export async function sendEmail({
   html: string
 }): Promise<{ ok: boolean; consoleOnly?: boolean; error?: string }> {
   if (!isEmailEnabled()) {
-    // Dev fallback — surface the content so OTPs can be read from the dev log.
+    // Dev fallback, surface the content so OTPs can be read from the dev log.
     console.log(`\n📧 [email:console] To: ${to}\nSubject: ${subject}\n${html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}\n`)
     return { ok: true, consoleOnly: true }
   }

@@ -5,7 +5,7 @@ import { LegalPage } from '@/components/LegalPage'
 export const metadata: Metadata = {
   title: 'Worldwide Shipping & Returns',
   description:
-    'How Piton Enterprise ships handcrafted sarees, kurtis and lehengas worldwide — processing times, delivery estimates, costs, customs, tracking, and our 7-day return policy.',
+    'How Piton Enterprise ships handcrafted sarees, kurtis and lehengas worldwide, processing times, delivery estimates, costs, customs, tracking, and our 7-day return policy.',
   alternates: { canonical: '/shipping' },
 }
 
@@ -19,18 +19,18 @@ export default function ShippingPage() {
 
       <h2>Order processing</h2>
       <p>
-        Most orders are processed within 1–3 business days. Because many of our pieces are made
-        and finished by hand, certain items may need a little longer — if so, we&apos;ll let you
+        Most orders are processed within 1-3 business days. Because many of our pieces are made
+        and finished by hand, certain items may need a little longer, if so, we&apos;ll let you
         know by email.
       </p>
 
       <h2>Delivery estimates</h2>
       <p>Once dispatched, typical delivery times are:</p>
       <ul>
-        <li>India: 3–6 business days</li>
-        <li>Asia &amp; Middle East: 5–10 business days</li>
-        <li>Europe &amp; UK: 7–12 business days</li>
-        <li>North America, Australia &amp; rest of world: 8–15 business days</li>
+        <li>India: 3-6 business days</li>
+        <li>Asia &amp; Middle East: 5-10 business days</li>
+        <li>Europe &amp; UK: 7-12 business days</li>
+        <li>North America, Australia &amp; rest of world: 8-15 business days</li>
       </ul>
       <p>These are estimates and may vary with customs clearance and local courier schedules.</p>
 
@@ -64,13 +64,13 @@ export default function ShippingPage() {
         <li>To start a return, contact us with your order number.</li>
         <li>Return shipping costs are the customer&apos;s responsibility unless the item arrived faulty or incorrect.</li>
         <li>Once we receive and inspect the item, eligible refunds are issued to your original payment method.</li>
-        <li>For hygiene reasons, certain items may not be eligible for return — this will be noted on the product page.</li>
+        <li>For hygiene reasons, certain items may not be eligible for return, this will be noted on the product page.</li>
       </ul>
 
       <h2>Questions?</h2>
       <p>
         For anything about shipping or returns, reach us through our{' '}
-        <Link href="/contact">contact page</Link> — we&apos;re happy to help.
+        <Link href="/contact">contact page</Link>, we&apos;re happy to help.
       </p>
     </LegalPage>
   )

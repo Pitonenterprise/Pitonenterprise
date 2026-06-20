@@ -58,7 +58,7 @@ function LoginInner() {
       <h1 className="text-center font-display text-4xl text-foreground">Sign in</h1>
       {justVerified && (
         <p className="mt-4 rounded-sm bg-gold-soft/40 px-3 py-2 text-center text-sm text-wine">
-          Email verified — please sign in.
+          Email verified, please sign in.
         </p>
       )}
       <form onSubmit={submit} className="mt-8 space-y-3">
