@@ -18,6 +18,15 @@ export const Products: CollectionConfig = {
   },
   fields: [
     {
+      name: 'aiAssistant',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/admin/AIProductAssistant#AIProductAssistant',
+        },
+      },
+    },
+    {
       type: 'row',
       fields: [
         { name: 'title', type: 'text', required: true, localized: true, admin: { width: '70%' } },
