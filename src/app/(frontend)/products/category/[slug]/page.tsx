@@ -6,8 +6,14 @@ import { getCategories, getCategoryBySlug, getProducts } from '@/lib/queries'
 export const revalidate = 120
 
 export async function generateStaticParams() {
-  const categories = await getCategories()
-  return categories.map((c) => ({ slug: c.slug }))
+  // Defensive: never let a build-time DB hiccup fail the whole build.
+  // Pages still render on demand via ISR.
+  try {
+    const categories = await getCategories()
+    return categories.map((c) => ({ slug: c.slug }))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({
