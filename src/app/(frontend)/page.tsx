@@ -1,11 +1,29 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ProductCard } from '@/components/ProductCard'
 import { getCategories, getFeaturedByCategory } from '@/lib/queries'
+import { getPayloadClient } from '@/lib/payload'
 
 export const revalidate = 120 // ISR, fast, SEO-friendly catalog pages
 
+async function getHeroImage(): Promise<{ url: string; alt: string } | null> {
+  try {
+    const payload = await getPayloadClient()
+    const settings: any = await payload.findGlobal({ slug: 'settings', depth: 1, overrideAccess: true })
+    const img = settings?.heroImage
+    if (img && typeof img === 'object' && img.url) {
+      return { url: img.url, alt: img.alt || 'Piton Enterprise' }
+    }
+  } catch {}
+  return null
+}
+
 export default async function Home() {
-  const [categories, sections] = await Promise.all([getCategories(), getFeaturedByCategory()])
+  const [categories, sections, heroImage] = await Promise.all([
+    getCategories(),
+    getFeaturedByCategory(),
+    getHeroImage(),
+  ])
 
   return (
     <main>
@@ -38,7 +56,20 @@ export default async function Home() {
           </div>
 
           <div className="relative h-[360px] md:h-[520px]">
-            <div className="absolute right-0 top-0 h-[78%] w-[62%] rounded-sm" style={{ background: 'linear-gradient(150deg,#6e1f3b,#4a1228)' }} />
+            {heroImage ? (
+              <div className="absolute right-0 top-0 h-[78%] w-[62%] overflow-hidden rounded-sm">
+                <Image
+                  src={heroImage.url}
+                  alt={heroImage.alt}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 62vw, 400px"
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="absolute right-0 top-0 h-[78%] w-[62%] rounded-sm" style={{ background: 'linear-gradient(150deg,#6e1f3b,#4a1228)' }} />
+            )}
             <div className="absolute bottom-0 left-0 h-[62%] w-[52%] rounded-sm border-8 border-background" style={{ background: 'linear-gradient(150deg,#e8d7b8,#b68a3e)' }} />
             <div className="absolute bottom-6 right-6 rounded-sm bg-background/95 px-5 py-4 text-center shadow-sm">
               <div className="font-display text-2xl text-wine">120+</div>

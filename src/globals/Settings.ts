@@ -10,6 +10,12 @@ export const Settings: GlobalConfig = {
   },
   fields: [
     {
+      name: 'heroImage',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { description: 'Homepage hero image (right-side box). Portrait works best (3:4).' },
+    },
+    {
       type: 'row',
       fields: [
         { name: 'storeName', type: 'text', defaultValue: 'Piton Enterprise', admin: { width: '50%' } },
