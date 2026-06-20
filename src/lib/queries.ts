@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { getPayloadClient } from './payload'
 
 // Storefront-facing shapes (decoupled from generated payload-types).
@@ -81,7 +82,9 @@ function mapCategory(doc: Record<string, any>): StoreCategory {
   }
 }
 
-export async function getCategories(): Promise<StoreCategory[]> {
+// cache() dedupes identical calls within a single request (e.g. generateMetadata
+// + the page component) so each page hits the DB once, not 2–3×.
+export const getCategories = cache(async (): Promise<StoreCategory[]> => {
   const payload = await getPayloadClient()
   const res = await payload.find({
     collection: 'categories',
@@ -91,9 +94,9 @@ export async function getCategories(): Promise<StoreCategory[]> {
     overrideAccess: true,
   })
   return res.docs.map(mapCategory)
-}
+})
 
-export async function getCategoryBySlug(slug: string): Promise<StoreCategory | null> {
+export const getCategoryBySlug = cache(async (slug: string): Promise<StoreCategory | null> => {
   const payload = await getPayloadClient()
   const res = await payload.find({
     collection: 'categories',
@@ -103,7 +106,7 @@ export async function getCategoryBySlug(slug: string): Promise<StoreCategory | n
     overrideAccess: true,
   })
   return res.docs[0] ? mapCategory(res.docs[0]) : null
-}
+})
 
 type ProductQuery = {
   categorySlug?: string
@@ -147,7 +150,7 @@ export async function getProducts(q: ProductQuery = {}): Promise<{
   }
 }
 
-export async function getProductBySlug(slug: string): Promise<StoreProduct | null> {
+export const getProductBySlug = cache(async (slug: string): Promise<StoreProduct | null> => {
   const payload = await getPayloadClient()
   const res = await payload.find({
     collection: 'products',
@@ -157,7 +160,7 @@ export async function getProductBySlug(slug: string): Promise<StoreProduct | nul
     overrideAccess: true,
   })
   return res.docs[0] ? mapProduct(res.docs[0]) : null
-}
+})
 
 export async function getProductsByIds(ids: (string | number)[]): Promise<StoreProduct[]> {
   if (ids.length === 0) return []
