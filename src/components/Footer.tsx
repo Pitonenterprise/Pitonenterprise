@@ -30,7 +30,7 @@ const COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 bg-wine-deep text-gold-soft">
+    <footer className="mt-24 bg-wine-deep text-gold-soft print:hidden">
       {/* Newsletter */}
       <div className="border-b border-white/10">
         <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-5 px-6 py-14 text-center md:px-8">

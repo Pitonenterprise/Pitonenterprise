@@ -36,12 +36,12 @@ export function Header() {
   return (
     <>
       {/* Announcement bar */}
-      <div className="bg-wine-deep px-4 py-[9px] text-center text-[11.5px] uppercase tracking-[2.5px] text-gold-soft">
+      <div className="bg-wine-deep px-4 py-[9px] text-center text-[11.5px] uppercase tracking-[2.5px] text-gold-soft print:hidden">
         Festive Edit is live · Worldwide shipping · Easy 7-day returns
       </div>
 
       {/* Sticky header */}
-      <header className="sticky top-0 z-50 border-b border-line bg-[rgba(247,241,232,0.92)] backdrop-blur-[10px]">
+      <header className="sticky top-0 z-50 border-b border-line bg-[rgba(247,241,232,0.92)] backdrop-blur-[10px] print:hidden">
         <div className="mx-auto grid max-w-[1280px] grid-cols-2 items-center gap-6 px-5 py-4 md:grid-cols-[1fr_auto_1fr] md:px-8">
           {/* Left nav (desktop) */}
           <nav className="hidden items-center gap-[26px] md:flex">

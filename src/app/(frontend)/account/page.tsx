@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { headers as nextHeaders } from 'next/headers'
 import { getPayloadClient } from '@/lib/payload'
 import { formatINR } from '@/lib/format'
+import { orderHeadline, paymentLabel } from '@/lib/orderStatus'
 import { LogoutButton } from '@/components/LogoutButton'
 
 // User-specific (reads the auth cookie), never prerender at build time.
@@ -65,19 +66,30 @@ export default async function AccountPage() {
       ) : (
         <ul className="divide-y divide-line">
           {orders.docs.map((o: any) => (
-            <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 py-5">
-              <div>
-                <p className="font-medium text-foreground">{o.orderNumber}</p>
-                <p className="text-xs uppercase tracking-[1.5px] text-muted">
-                  {new Date(o.createdAt).toLocaleDateString()} · {o.items?.length ?? 0} item(s)
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="rounded-full bg-gold-soft/40 px-3 py-1 text-[10px] uppercase tracking-[1.5px] text-wine">
-                  {o.paymentStatus} · {o.fulfillmentStatus}
-                </span>
-                <span className="text-wine">{formatINR(o.total)}</span>
-              </div>
+            <li key={o.id}>
+              <Link
+                href={`/account/orders/${o.orderNumber}`}
+                className="flex flex-wrap items-center justify-between gap-3 py-5 transition hover:opacity-70"
+              >
+                <div>
+                  <p className="font-medium text-foreground">{o.orderNumber}</p>
+                  <p className="text-xs uppercase tracking-[1.5px] text-muted">
+                    {new Date(o.createdAt).toLocaleDateString()} · {o.items?.length ?? 0} item(s)
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-right">
+                    <span className="block rounded-full bg-gold-soft/40 px-3 py-1 text-[10px] uppercase tracking-[1.5px] text-wine">
+                      {orderHeadline(o)}
+                    </span>
+                    <span className="mt-1 block text-[10px] uppercase tracking-[1px] text-muted">
+                      {paymentLabel(o.paymentStatus, o.paymentProvider)}
+                    </span>
+                  </span>
+                  <span className="text-wine">{formatINR(o.total)}</span>
+                  <span className="text-muted">→</span>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
