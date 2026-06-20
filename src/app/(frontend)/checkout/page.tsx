@@ -54,6 +54,28 @@ export default function CheckoutPage() {
       .catch(() => {})
   }, [])
 
+  // Require sign-in to check out: prefill from the account, or redirect to login.
+  const [authChecked, setAuthChecked] = useState(false)
+  useEffect(() => {
+    fetch('/api/customers/me', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.user) {
+          setForm((f) => ({
+            ...f,
+            email: d.user.email || f.email,
+            name: [d.user.firstName, d.user.lastName].filter(Boolean).join(' ') || f.name,
+            phone: d.user.phone || f.phone,
+          }))
+          setAuthChecked(true)
+        } else {
+          router.replace('/account/login?redirect=/checkout')
+        }
+      })
+      .catch(() => router.replace('/account/login?redirect=/checkout'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // All amounts in INR. Shipping is flat per destination country.
   const subtotalInr = inr(cartSubtotal)
   const shippingInr = isIndia(form.country) ? INDIA_SHIPPING_INR : INTERNATIONAL_SHIPPING_INR
@@ -131,6 +153,10 @@ export default function CheckoutPage() {
         }),
       })
       const data = await res.json()
+      if (res.status === 401 || data.error === 'login_required') {
+        router.replace('/account/login?redirect=/checkout')
+        return
+      }
       if (!res.ok) throw new Error(data.error || 'Checkout failed')
 
       if (data.provider === 'razorpay') {
@@ -152,6 +178,14 @@ export default function CheckoutPage() {
       <main className="mx-auto max-w-[900px] px-6 py-24 text-center">
         <h1 className="font-display text-4xl">Your bag is empty</h1>
         <Link href="/products" className="mt-6 inline-block text-wine underline">Shop the collection</Link>
+      </main>
+    )
+  }
+
+  if (!authChecked) {
+    return (
+      <main className="mx-auto max-w-[900px] px-6 py-24 text-center text-muted">
+        Please sign in to continue to checkout…
       </main>
     )
   }

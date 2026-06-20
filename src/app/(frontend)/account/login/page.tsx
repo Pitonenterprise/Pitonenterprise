@@ -10,6 +10,7 @@ function LoginInner() {
   const { refreshAccountSync } = useStore()
   const params = useSearchParams()
   const justVerified = params.get('verified') === '1'
+  const redirectTo = params.get('redirect') || '/account'
   const [email, setEmail] = useState(params.get('email') || '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -42,7 +43,7 @@ function LoginInner() {
         throw new Error('Invalid email or password')
       }
       await refreshAccountSync() // merge account cart/wishlist into the session
-      router.push('/account')
+      router.push(redirectTo)
       router.refresh()
     } catch (err) {
       setError((err as Error).message)

@@ -19,15 +19,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { items, email, method, shippingAddress } = body
-  if (!items?.length || !email) {
-    return NextResponse.json({ error: 'Missing items or email' }, { status: 400 })
+  const { items, method, shippingAddress } = body
+  if (!items?.length) {
+    return NextResponse.json({ error: 'Missing items' }, { status: 400 })
   }
   if (!enabledMethods().includes(method)) {
     return NextResponse.json({ error: 'Payment method not available' }, { status: 400 })
   }
 
   const payload = await getPayloadClient()
+
+  // Require a signed-in customer to place an order.
+  const { user } = await payload.auth({ headers: req.headers })
+  if (!user || user.collection !== 'customers') {
+    return NextResponse.json({ error: 'login_required' }, { status: 401 })
+  }
+  const email = user.email as string
+  const customerId = user.id
 
   // Recompute prices from the DB, never trust client-sent prices.
   const ids = items.map((i) => i.productId)
@@ -74,6 +82,7 @@ export async function POST(req: Request) {
     overrideAccess: true,
     data: {
       email,
+      customer: customerId,
       items: lineItems,
       currency: 'INR',
       subtotal,
