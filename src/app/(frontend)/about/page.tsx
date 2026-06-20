@@ -11,8 +11,6 @@ export const metadata: Metadata = {
 const STATS = [
   { value: '2006', label: 'Crafting since' },
   { value: '50+', label: 'Skilled artisans' },
-  { value: '1', label: 'Manufacturing unit' },
-  { value: '1', label: 'Retail shop' },
 ]
 
 export default function AboutPage() {
@@ -35,7 +33,7 @@ export default function AboutPage() {
 
       {/* Stats */}
       <section className="border-b border-line bg-background">
-        <div className="mx-auto grid max-w-[1000px] grid-cols-2 gap-px md:grid-cols-4">
+        <div className="mx-auto grid max-w-[600px] grid-cols-2 gap-px">
           {STATS.map((s) => (
             <div key={s.label} className="px-6 py-12 text-center">
               <div className="font-display text-4xl text-wine md:text-5xl">{s.value}</div>
