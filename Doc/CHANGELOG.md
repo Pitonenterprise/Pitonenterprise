@@ -2,6 +2,13 @@
 
 > Running log of notable changes, newest first. Update with every meaningful change.
 
+## 2026-06-20 (content pages)
+- Added **About / Our Story** page (`/about`) — founded 2006, grew from 1 employee to 50
+  artisans, own manufacturing unit + retail shop, ships worldwide. SEO metadata + stats strip.
+- Added **Contact Us** (`/contact`): form saves to a new `messages` collection (admin-managed)
+  and sends a best-effort notification email to the store (`supportEmail` from Settings, else
+  fallback). Page shows email/WhatsApp/shop/hours.
+
 ## 2026-06-20 (account-synced cart + wishlist)
 - Cart + wishlist now follow the customer across devices. `Customers` gained a `cart` array
   (alongside the existing `wishlist` relationship). `/api/account/cart` GET/PUT (auth-guarded)

@@ -23,9 +23,7 @@ const COLUMNS = [
     title: 'About',
     links: [
       { label: 'Our Story', href: '/about' },
-      { label: 'Craftsmanship', href: '/craftsmanship' },
-      { label: 'Journal', href: '/journal' },
-      { label: 'Careers', href: '/careers' },
+      { label: 'Contact Us', href: '/contact' },
     ],
   },
 ]
