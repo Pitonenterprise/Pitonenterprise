@@ -32,11 +32,15 @@ export async function sendEmail({
     })
     if (!res.ok) {
       const body = await res.text()
-      return { ok: false, error: `Resend ${res.status}: ${body}` }
+      const error = `Resend ${res.status}: ${body}`
+      console.error(`❌ [email] send failed to ${to}: ${error}`)
+      return { ok: false, error }
     }
     return { ok: true }
   } catch (err) {
-    return { ok: false, error: (err as Error).message }
+    const error = (err as Error).message
+    console.error(`❌ [email] send threw for ${to}: ${error}`)
+    return { ok: false, error }
   }
 }
 
