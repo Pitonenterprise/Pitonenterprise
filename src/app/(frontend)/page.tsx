@@ -15,8 +15,8 @@ export default async function Home() {
           <div className="animate-[pfade_0.7s_ease]">
             <p className="text-[11px] uppercase tracking-[4px] text-gold">The Festive Edit · 2026</p>
             <h1 className="mt-5 font-display text-5xl leading-[1.05] text-foreground md:text-[64px]">
-              Heirloom drapes,<br />
-              <span className="text-wine">woven for today</span>
+              Where tradition meets<br />
+              <span className="text-wine">timeless beauty</span>
             </h1>
             <p className="mt-6 max-w-md text-[15px] leading-relaxed text-foreground/70">
               Handcrafted sarees, kurtis and lehengas from India&apos;s finest weavers,               shipped, with love, anywhere in the world.
