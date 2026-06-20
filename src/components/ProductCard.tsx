@@ -1,48 +1,58 @@
-import Image from "next/image";
-import Link from "next/link";
-import type { Product } from "@/types";
-import { formatPrice } from "@/lib/currency";
-import { WishlistButton } from "@/components/WishlistButton";
+import Link from 'next/link'
+import Image from 'next/image'
+import type { StoreProduct } from '@/lib/queries'
+import { formatPrice } from '@/lib/format'
+import { WishlistButton } from './WishlistButton'
 
-export function ProductCard({ product }: { product: Product }) {
-  const lowStock = product.stock_quantity > 0 && product.stock_quantity <= 3;
-  const outOfStock = product.stock_quantity === 0;
-
+export function ProductCard({ product }: { product: StoreProduct }) {
+  const hasImage = !!product.image?.url
   return (
-    <div className="group relative rounded-2xl overflow-hidden bg-white border border-black/5 hover:shadow-lg transition-all">
-      <WishlistButton productId={product.id} />
+    <div className="group relative">
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="relative aspect-[3/4] bg-[var(--muted)] overflow-hidden">
-          <Image
-            src={product.image_url || "https://picsum.photos/seed/saree/600/800"}
-            alt={product.name}
-            fill
-            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-          {outOfStock && (
-            <span className="absolute top-3 left-3 bg-black/80 text-white text-xs px-2 py-1 rounded">
-              Out of stock
+        <div className="relative overflow-hidden rounded-sm bg-line/40">
+          {hasImage ? (
+            <Image
+              src={product.image!.url}
+              alt={product.image!.alt || product.title}
+              width={768}
+              height={1024}
+              className="aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div
+              className="aspect-[3/4] w-full transition duration-500 group-hover:scale-[1.03]"
+              style={{ background: product.accentColor || 'linear-gradient(145deg,#6e1f3b,#4a1228)' }}
+            />
+          )}
+          {product.badge && (
+            <span className="absolute left-3 top-3 bg-background/90 px-3 py-1 text-[10px] uppercase tracking-[2px] text-wine">
+              {product.badge}
             </span>
           )}
-          {lowStock && (
-            <span className="absolute top-3 left-3 bg-[var(--brand)] text-white text-xs px-2 py-1 rounded">
-              Only {product.stock_quantity} left
-            </span>
-          )}
-        </div>
-        <div className="p-4">
-          <p className="text-[11px] uppercase tracking-wider text-black/50">
-            {product.fabric}
-          </p>
-          <h3 className="serif text-lg font-medium mt-1 line-clamp-1">
-            {product.name}
-          </h3>
-          <p className="text-[var(--brand)] font-semibold mt-1">
-            {formatPrice(product.price_inr)}
-          </p>
         </div>
       </Link>
+      <WishlistButton
+        productId={product.id}
+        className="absolute right-3 top-3 opacity-0 transition group-hover:opacity-100"
+      />
+      <div className="mt-3 space-y-1">
+        {product.fabric && (
+          <p className="text-[10px] uppercase tracking-[2px] text-muted">{product.fabric}</p>
+        )}
+        <h3 className="font-display text-[17px] leading-snug text-foreground">
+          <Link href={`/products/${product.slug}`} className="transition hover:text-wine">
+            {product.title}
+          </Link>
+        </h3>
+        <p className="flex items-center gap-2 text-sm">
+          <span className="text-wine">{formatPrice(product.price)}</span>
+          {product.compareAtPrice && product.compareAtPrice > product.price && (
+            <span className="text-xs text-muted line-through">
+              {formatPrice(product.compareAtPrice)}
+            </span>
+          )}
+        </p>
+      </div>
     </div>
-  );
+  )
 }

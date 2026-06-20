@@ -1,62 +1,92 @@
-import Link from "next/link";
-import { CartBadge } from "@/components/CartBadge";
-import { STORE_NAME } from "@/lib/config";
-import { getCurrentUser } from "@/lib/supabase-auth";
+import Link from 'next/link'
+import { CartBadge } from './CartBadge'
 
-export async function Header() {
-  const user = await getCurrentUser().catch(() => null);
-  const fullName = (user?.user_metadata?.full_name as string | undefined) || "";
-  const firstName = fullName.split(" ")[0];
+const NAV = [
+  { label: 'Home', href: '/' },
+  { label: 'Sarees', href: '/#sarees' },
+  { label: 'Kurtis', href: '/#kurtis' },
+  { label: 'Lehengas', href: '/#lehengas' },
+  { label: 'Western', href: '/#western' },
+]
 
+const FREE_SHIP_LABEL = '$150'
+
+function IconButton({
+  label,
+  href,
+  children,
+}: {
+  label: string
+  href: string
+  children: React.ReactNode
+}) {
   return (
-    <header className="border-b border-black/10 bg-[var(--background)]/95 backdrop-blur sticky top-0 z-30">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="serif text-2xl font-semibold text-[var(--brand)]">
-            {STORE_NAME}
-          </Link>
-          <nav className="hidden md:flex items-center gap-7 text-sm">
-            <Link href="/products" className="hover:text-[var(--brand)]">All Sarees</Link>
-            <Link href="/products?category=bridal" className="hover:text-[var(--brand)]">Bridal</Link>
-            <Link href="/products?category=festive" className="hover:text-[var(--brand)]">Festive</Link>
-            <Link href="/products?category=casual" className="hover:text-[var(--brand)]">Daily Wear</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            {user ? (
-              <>
-                <Link
-                  href="/wishlist"
-                  className="hidden sm:inline-flex items-center gap-1 px-3 py-2 text-sm font-medium hover:text-[var(--brand)]"
-                  aria-label="Wishlist"
-                >
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </Link>
-                <Link
-                  href="/account"
-                  className="hidden sm:inline px-3 py-2 text-sm font-medium hover:text-[var(--brand)]"
-                >
-                  Hi{firstName ? `, ${firstName}` : ""}
-                </Link>
-                <form action="/auth/signout" method="POST">
-                  <button className="text-sm text-black/55 hover:text-[var(--brand)] px-2">
-                    Logout
-                  </button>
-                </form>
-              </>
-            ) : (
+    <Link
+      href={href}
+      aria-label={label}
+      title={label}
+      className="text-foreground/80 transition hover:text-wine"
+    >
+      {children}
+    </Link>
+  )
+}
+
+export function Header() {
+  return (
+    <>
+      {/* Announcement bar */}
+      <div className="bg-wine-deep px-4 py-[9px] text-center text-[11.5px] uppercase tracking-[2.5px] text-gold-soft">
+        Festive Edit is live · Free shipping over {FREE_SHIP_LABEL} · Easy 7-day returns
+      </div>
+
+      {/* Sticky header */}
+      <header className="sticky top-0 z-50 border-b border-line bg-[rgba(247,241,232,0.92)] backdrop-blur-[10px]">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-2 items-center gap-6 px-5 py-4 md:grid-cols-[1fr_auto_1fr] md:px-8">
+          {/* Left nav (desktop) */}
+          <nav className="hidden items-center gap-[26px] md:flex">
+            {NAV.map((item) => (
               <Link
-                href="/login"
-                className="text-sm font-medium hover:text-[var(--brand)] px-3 py-2"
+                key={item.label}
+                href={item.href}
+                className="text-[12.5px] uppercase tracking-[1.5px] text-foreground transition hover:text-wine"
               >
-                Sign in
+                {item.label}
               </Link>
-            )}
+            ))}
+          </nav>
+
+          {/* Logo (centered) */}
+          <Link href="/" className="text-center leading-none md:justify-self-center">
+            <div className="font-display text-[27px] tracking-[1px] text-wine">Piton</div>
+            <div className="mt-0.5 text-[9.5px] uppercase tracking-[5px] text-gold">
+              Enterprise
+            </div>
+          </Link>
+
+          {/* Right icons */}
+          <div className="flex items-center justify-end gap-5">
+            <IconButton label="Search" href="/search">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" strokeLinecap="round" />
+              </svg>
+            </IconButton>
+            <IconButton label="Account" href="/account">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
+              </svg>
+            </IconButton>
+            <IconButton label="Wishlist" href="/wishlist">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12 20S3.5 14.5 3.5 8.8A4.3 4.3 0 0 1 12 6a4.3 4.3 0 0 1 8.5 2.8C20.5 14.5 12 20 12 20Z" strokeLinejoin="round" />
+              </svg>
+            </IconButton>
             <CartBadge />
           </div>
         </div>
-      </div>
-    </header>
-  );
+      </header>
+    </>
+  )
 }

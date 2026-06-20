@@ -1,0 +1,93 @@
+# Changelog
+
+> Running log of notable changes, newest first. Update with every meaningful change.
+
+## 2026-06-20 (email OTP verification)
+- **Added email OTP verification for customer signup** (was previously instant/no verification).
+  - `Customers`: new `isVerified` + hidden OTP fields (`otpHash`, `otpExpiresAt`, `otpAttempts`);
+    `beforeLogin` hook blocks sign-in until verified (throws `ACCOUNT_NOT_VERIFIED`).
+  - `lib/otp.ts`: 6-digit code, HMAC-SHA256 hash (bound to email), 10-min TTL, 5-attempt cap,
+    constant-time compare. `lib/email.ts`: Resend HTTP API sender with console fallback.
+  - Routes: `/api/auth/register` (create + send code), `/verify-otp`, `/resend-otp`.
+  - Frontend: register → `/account/verify` (6-box OTP, paste, resend w/ cooldown) → login.
+    Login routes unverified users back to the OTP screen.
+  - Env: `RESEND_API_KEY`, `EMAIL_FROM`. Until a key is set, codes print to the server console.
+  - Tested end-to-end (console mode): register→code, login blocked (403) pre-verify, verify→200,
+    login→200 post-verify. Production build passes.
+
+## 2026-06-20 (e-commerce core)
+- **Built the full e-commerce core** (Phases 1–4). Production build passes (26 routes).
+- **Data model** (`src/collections`): `Products` (price, compareAtPrice, images, sizes/variants,
+  stock, attributes, badge, accentColor, SEO, status), `Categories`, `Customers` (auth + addresses
+  + wishlist), `Orders` (items snapshot, totals, payment/fulfillment status, addresses) + `Settings`
+  global (shipping, tax, currencies, socials). Reusable `slugField`, `seoField`, access helpers.
+  - Dropped Payload `drafts` on Products/Categories — its `_status` enum collided with our custom
+    `status` field (`enum_products_status` "active" rejected). Using `status` (active/oos/archived).
+- **DB tuning:** Supabase **session pooler (5432)** capped at pool_size 15; set Payload pool
+  `max: 8` + `idleTimeoutMillis`, and **`push: false`** (schema already synced) to stop per-init
+  introspection exhausting connections. To change schema later: temporarily `push: true` + restart.
+- **Data layer** (`src/lib`): cached `getPayloadClient` (do NOT cache under global `_payload` —
+  Payload reserves it), `queries.ts` (categories/products/by-slug/by-ids/search/featured),
+  `format.ts` (multi-currency FX + `Intl` formatting). Seeded 4 categories + 12 products via
+  guarded dev route `/api/seed`.
+- **Storefront (live data):** home (hero + category strip + featured sections), `/products`
+  (sort + pagination), `/products/category/[slug]` (SSG params), `/products/[slug]` (gallery,
+  add-to-cart with sizes, attributes, related, **Product JSON-LD**), `/search`.
+- **Cart + Wishlist:** client `StoreProvider` (localStorage persistence), cart badge, add-to-cart,
+  wishlist toggle, `/cart` and `/wishlist` pages.
+- **Checkout + payments:** `/api/checkout` recomputes prices server-side, creates an `Order`,
+  initializes the gateway. **Stripe + Razorpay** integrations + signature-verified webhooks,
+  **gated on env keys**; **Pay-on-Delivery** works today (tested end-to-end → order PE-2886).
+- **Customer accounts:** register / login / logout, `/account` dashboard with order history.
+- **SEO:** per-page metadata + canonicals, dynamic `sitemap.xml` (18 URLs) + `robots.txt`.
+
+## 2026-06-20 (later)
+- **Implemented the "Piton Enterprise" design** from the Claude Design project
+  (`claude_design` MCP, project "Women's saree and dress site"). The source `.dc.html`
+  specified the announcement bar + sticky header; extended the homepage, footer, and product
+  cards in the same visual language.
+  - Design tokens (`globals.css`): cream `#F7F1E8`, ink `#2A2320`, wine `#6E1F3B`, deep wine
+    `#4A1228`, gold `#B68A3E`, soft gold `#E8D7B8`. Fonts: Marcellus (display) + Jost (body).
+  - New components: `Header` (announcement bar, sticky blur nav Home/Sarees/Kurtis/Lehengas/
+    Western, centered logo, search/account/wishlist/cart icons), `Footer` (newsletter + link
+    columns), `ProductCard`.
+  - Homepage: hero, category strip, per-category featured sections (`#sarees` … `#western`
+    anchors), trust strip. Uses temporary `src/data/sample-products.ts` (brand-gradient image
+    placeholders) until the Payload `Products` catalog lands in Phase 1.
+
+## 2026-06-20
+- **Phase 0 scaffold complete.** Created a Next.js 16 + React 19 + TypeScript app with
+  Tailwind CSS v4. Integrated **Payload CMS 3.85** directly inside it:
+  - Split routes into `src/app/(frontend)` (storefront, own root layout + brand tokens/fonts)
+    and `src/app/(payload)` (admin at `/admin` + REST/GraphQL APIs).
+  - Added `src/payload.config.ts` with the Postgres adapter (Supabase **session pooler**,
+    port 5432), Lexical rich-text editor, and localization (`en`, `hi`).
+  - Base collections: `Users` (auth) and `Media` (uploads with image sizes + localized alt).
+  - Wired `withPayload` in `next.config.ts`, added `@payload-config` tsconfig alias and
+    Payload npm scripts.
+  - Booted dev server → Payload auto-synced its schema into the empty Supabase DB (users,
+    media, sessions, preferences, migrations, etc.). Verified storefront + `/admin` render.
+  - Created the first admin user (`pitonenterprise3240@gmail.com`) — temp password, must change.
+  - KNOWN ISSUE: `payload generate:types` / `generate:importmap` CLI fail on Node 20.20 with
+    `ERR_REQUIRE_ASYNC_MODULE` (ESM/TLA). Non-blocking (dev bundler loads the config fine);
+    to resolve later. `payload-types.ts` not yet generated.
+
+## 2026-06-19
+- Connected directly to Supabase Postgres (transaction pooler, region aws-1-us-east-1) and
+  **dropped ALL old tables** (`chat_messages`, `chat_sessions`, `orders`, `products`, `wishlists`).
+  `public` schema is now empty — clean slate for Payload. `DATABASE_URI` + a generated
+  `PAYLOAD_SECRET` saved to `.env.local`.
+- Wired Supabase: saved anon + service_role keys to `.env.local` (gitignored); verified the
+  project (`htxnycxfsbnoegfyvqhw`) is reachable and keys work. Recreated `.gitignore` so secrets
+  are never committed.
+- Discovered the Supabase project held the OLD app's data: `products` (2 sample sarees,
+  snake_case schema, images in `product-images` storage bucket) and `orders`.
+- **Wiped Supabase clean** per request: deleted both storage files, deleted the `product-images`
+  bucket, and deleted all rows from `products` and `orders`. Verified empty (no buckets, no rows).
+  The empty old table *definitions* still exist; they'll be dropped when Payload runs its schema
+  migration (needs the DB password / `DATABASE_URI`).
+- Cleared the old codebase to start fresh (kept `.env.local.example` and git history).
+- Confirmed stack: Next.js (App Router) + TS, Tailwind + shadcn/ui, Payload CMS 3,
+  Supabase Postgres, Stripe + Razorpay, multi-language + multi-currency, Vercel hosting.
+- Created the `Doc/` living documentation set: README, ARCHITECTURE, TECH_STACK, DATA_MODEL,
+  SEO, I18N, PAYMENTS, ENV, ROADMAP, CHANGELOG.
