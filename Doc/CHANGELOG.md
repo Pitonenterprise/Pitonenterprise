@@ -55,6 +55,16 @@
 - **Customer accounts:** register / login / logout, `/account` dashboard with order history.
 - **SEO:** per-page metadata + canonicals, dynamic `sitemap.xml` (18 URLs) + `robots.txt`.
 
+## 2026-06-20 (Supabase Storage for uploads)
+- Fixed 500 on image uploads on the live site. Vercel's filesystem is read-only, so Payload's
+  default local-disk uploads fail in production. Added a custom Payload cloud-storage adapter
+  (`src/lib/supabaseStorageAdapter.ts`) that uploads to a **public Supabase Storage bucket**
+  (`media`) via the REST API + the existing service-role key — no separate S3 keys needed.
+  Images (and all resized sizes) now serve from Supabase's public CDN.
+  - Enabled automatically when `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set
+    (both already in Vercel from before), so production works after deploy with no new env vars.
+  - Optional `SUPABASE_BUCKET` (defaults to `media`).
+
 ## 2026-06-20 (AI refinements + DB pooler)
 - AI image reads now load the file from disk (Payload upload dir) instead of an unreliable
   loopback HTTP fetch — fixes "fetch failed" when generating from an uploaded image.
