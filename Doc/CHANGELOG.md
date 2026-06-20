@@ -55,6 +55,16 @@
 - **Customer accounts:** register / login / logout, `/account` dashboard with order history.
 - **SEO:** per-page metadata + canonicals, dynamic `sitemap.xml` (18 URLs) + `robots.txt`.
 
+## 2026-06-20 (AI refinements + DB pooler)
+- AI image reads now load the file from disk (Payload upload dir) instead of an unreliable
+  loopback HTTP fetch — fixes "fetch failed" when generating from an uploaded image.
+- AI prompt now always extracts a specific primary colour and fabric from the image; added a
+  deterministic occasions fallback (infer from the copy). Attributes section opens by default.
+- Switched `DATABASE_URI` to the Supabase **transaction pooler (port 6543)**. Session mode
+  (5432) caps clients at 15 and was exhausted during builds (EMAXCONNSESSION) and serverless
+  runtime. 6543 multiplexes connections; build now runs with 7 parallel workers. **Action:
+  update DATABASE_URI to port 6543 in Vercel too.**
+
 ## 2026-06-20 (AI listing assistant)
 - Added an **AI Listing Assistant** to the Payload product editor. Staff upload an image and/or
   type rough notes, click "Generate with AI", and OpenAI writes an SEO-optimized title,

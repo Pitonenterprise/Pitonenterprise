@@ -32,7 +32,13 @@ Rules:
 - The description must be 2-3 short paragraphs: highlight fabric, craftsmanship, occasion,
   styling and fit. Persuasive but honest. Plain text only (no markdown).
 - seoTitle <= 60 chars, seoDescription <= 155 chars.
-- "occasions" MUST be a subset of: casual, party, wedding, festive, office, bridal.
+- "color": ALWAYS identify the garment's PRIMARY colour by looking at the image (e.g.
+  "Emerald Green", "Maroon", "Ivory", "Royal Blue"). When an image is provided, colour MUST
+  NOT be empty. Use a specific, natural colour name, not a generic one.
+- "fabric": identify the most likely fabric from the image and/or notes (e.g. "Silk",
+  "Georgette", "Chiffon", "Cotton", "Banarasi Silk"). Do not leave empty if it can be inferred.
+- "occasions": choose AT LEAST ONE best-fitting value; MUST be a subset of:
+  casual, party, wedding, festive, office, bridal.
 - "badge" is a short tag like "New", "Bestseller", "Bridal", "Limited" or "" if none fits.
 - "keywords" is 6-12 high-intent search keywords/phrases shoppers would use.
 - If the image and notes conflict, prefer what you can see in the image.
@@ -134,8 +140,8 @@ export async function generateProductListing(input: {
     throw new Error('OpenAI returned invalid JSON')
   }
 
-  // Normalize + validate occasions — tolerate plurals/casing (e.g. "Weddings" -> "wedding").
-  const occasions: string[] = Array.isArray(parsed.occasions)
+  // Normalize + validate occasions; tolerate plurals/casing (e.g. "Weddings" -> "wedding").
+  let occasions: string[] = Array.isArray(parsed.occasions)
     ? Array.from(
         new Set(
           parsed.occasions
@@ -151,6 +157,22 @@ export async function generateProductListing(input: {
         ),
       )
     : []
+
+  // Fallback: if the model returned no occasions, infer them from the copy by keyword.
+  if (occasions.length === 0) {
+    const haystack = `${parsed.title} ${parsed.description} ${(parsed.keywords || []).join(' ')}`.toLowerCase()
+    const SYNONYMS: Record<string, string[]> = {
+      wedding: ['wedding', 'marriage', 'reception', 'sangeet'],
+      bridal: ['bridal', 'bride', 'trousseau'],
+      festive: ['festive', 'festival', 'diwali', 'navratri', 'eid', 'celebration', 'puja'],
+      party: ['party', 'cocktail', 'evening', 'night out'],
+      office: ['office', 'work', 'formal', 'workwear'],
+      casual: ['casual', 'everyday', 'daily', 'day wear', 'daywear'],
+    }
+    occasions = ALLOWED_OCCASIONS.filter((a) =>
+      (SYNONYMS[a] || [a]).some((kw) => haystack.includes(kw)),
+    )
+  }
 
   return {
     title: String(parsed.title || '').trim(),

@@ -109,6 +109,7 @@ export const Products: CollectionConfig = {
     {
       type: 'collapsible',
       label: 'Attributes',
+      admin: { initCollapsed: false },
       fields: [
         {
           type: 'row',
