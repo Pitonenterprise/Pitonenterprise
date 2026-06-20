@@ -7,6 +7,7 @@ import { useStore } from '@/components/providers/StoreProvider'
 import { formatINR } from '@/lib/format'
 import { isIndia, INDIA_SHIPPING_INR, INTERNATIONAL_SHIPPING_INR } from '@/lib/shipping'
 import { COUNTRIES } from '@/data/countries'
+import { AddressAutocomplete } from '@/components/AddressAutocomplete'
 import type { PaymentMethod } from '@/lib/payments'
 
 // Cart prices are already in INR (base currency).
@@ -172,6 +173,19 @@ export default function CheckoutPage() {
 
           <section>
             <h2 className="mb-4 font-display text-2xl">Shipping address</h2>
+            <AddressAutocomplete
+              className="mb-3"
+              onSelect={(a) =>
+                setForm((f) => ({
+                  ...f,
+                  line1: a.line1 || f.line1,
+                  city: a.city || f.city,
+                  state: a.state || f.state,
+                  postalCode: a.postalCode || f.postalCode,
+                  country: a.country && COUNTRIES.includes(a.country) ? a.country : f.country,
+                }))
+              }
+            />
             <div className="grid gap-3 sm:grid-cols-2">
               <input required placeholder="Address line 1" value={form.line1} onChange={set('line1')} className={`${input} sm:col-span-2`} />
               <input placeholder="Address line 2" value={form.line2} onChange={set('line2')} className={`${input} sm:col-span-2`} />
