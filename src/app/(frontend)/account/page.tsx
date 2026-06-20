@@ -5,6 +5,9 @@ import { getPayloadClient } from '@/lib/payload'
 import { formatPrice } from '@/lib/format'
 import { LogoutButton } from '@/components/LogoutButton'
 
+// User-specific (reads the auth cookie) — never prerender at build time.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'My Account',
   robots: { index: false },
