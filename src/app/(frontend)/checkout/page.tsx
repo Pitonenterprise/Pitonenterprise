@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useStore } from '@/components/providers/StoreProvider'
 import { formatINR } from '@/lib/format'
 import { isIndia, INDIA_SHIPPING_INR, INTERNATIONAL_SHIPPING_INR } from '@/lib/shipping'
+import { COUNTRIES } from '@/data/countries'
 import type { PaymentMethod } from '@/lib/payments'
 
 // Cart prices are already in INR (base currency).
@@ -177,7 +178,17 @@ export default function CheckoutPage() {
               <input required placeholder="City" value={form.city} onChange={set('city')} className={input} />
               <input placeholder="State / Region" value={form.state} onChange={set('state')} className={input} />
               <input required placeholder="Postal code" value={form.postalCode} onChange={set('postalCode')} className={input} />
-              <input required placeholder="Country" value={form.country} onChange={set('country')} className={input} />
+              <select
+                required
+                value={form.country}
+                onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
+                className={`${input} ${form.country ? '' : 'text-muted'}`}
+              >
+                <option value="" disabled>Select country</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c} className="text-foreground">{c}</option>
+                ))}
+              </select>
             </div>
           </section>
 
