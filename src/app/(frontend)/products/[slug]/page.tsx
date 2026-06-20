@@ -143,6 +143,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
           {/* Details */}
           <dl className="mt-10 space-y-3 border-t border-line pt-8 text-sm">
+            {product.sku && (
+              <div className="flex gap-4">
+                <dt className="w-32 uppercase tracking-[1.5px] text-muted">Product ID</dt>
+                <dd className="text-foreground">{product.sku}</dd>
+              </div>
+            )}
             {product.fabric && (
               <div className="flex gap-4">
                 <dt className="w-32 uppercase tracking-[1.5px] text-muted">Fabric</dt>

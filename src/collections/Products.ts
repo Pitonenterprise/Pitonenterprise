@@ -7,7 +7,7 @@ export const Products: CollectionConfig = {
   slug: 'products',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'category', 'price', 'stock', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'sku', 'category', 'price', 'stock', 'status'],
     group: 'Catalog',
   },
   access: {
@@ -15,6 +15,23 @@ export const Products: CollectionConfig = {
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
+  },
+  hooks: {
+    afterChange: [
+      // Auto-assign a Product ID (SKU) on creation if none was entered.
+      async ({ doc, operation, req, context }) => {
+        if (operation === 'create' && !doc.sku && !(context as { skipSku?: boolean })?.skipSku) {
+          await req.payload.update({
+            collection: 'products',
+            id: doc.id,
+            data: { sku: `PE-${String(doc.id).padStart(5, '0')}` },
+            overrideAccess: true,
+            context: { skipSku: true },
+          })
+        }
+        return doc
+      },
+    ],
   },
   fields: [
     {
@@ -44,6 +61,17 @@ export const Products: CollectionConfig = {
       ],
     },
     slugField('title'),
+    {
+      name: 'sku',
+      type: 'text',
+      unique: true,
+      index: true,
+      label: 'Product ID (SKU)',
+      admin: {
+        position: 'sidebar',
+        description: 'Auto-generated (e.g. PE-00001). You can override with your own code.',
+      },
+    },
     {
       name: 'description',
       type: 'textarea',

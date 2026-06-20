@@ -8,6 +8,7 @@ export type StoreProduct = {
   id: string | number
   title: string
   slug: string
+  sku?: string | null
   price: number
   compareAtPrice?: number | null
   fabric?: string | null
@@ -51,6 +52,7 @@ function mapProduct(doc: Record<string, any>): StoreProduct {
     id: doc.id,
     title: doc.title,
     slug: doc.slug,
+    sku: doc.sku ?? null,
     price: doc.price ?? 0,
     compareAtPrice: doc.compareAtPrice ?? null,
     fabric: doc.fabric ?? null,
