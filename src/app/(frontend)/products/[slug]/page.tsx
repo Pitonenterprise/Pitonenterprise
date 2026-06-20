@@ -6,7 +6,7 @@ import { AddToCartButton } from '@/components/AddToCartButton'
 import { WishlistButton } from '@/components/WishlistButton'
 import { ProductCard } from '@/components/ProductCard'
 import { getProductBySlug, getProducts } from '@/lib/queries'
-import { formatPrice } from '@/lib/format'
+import { Price } from '@/components/Price'
 
 export const revalidate = 120
 
@@ -58,7 +58,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     offers: {
       '@type': 'Offer',
       url: `${siteUrl}/products/${product.slug}`,
-      priceCurrency: 'USD',
+      priceCurrency: 'INR',
       price: product.price,
       availability:
         product.stock > 0
@@ -98,11 +98,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </h1>
 
           <div className="mt-4 flex items-center gap-3">
-            <span className="text-2xl text-wine">{formatPrice(product.price)}</span>
+            <Price inr={product.price} className="text-2xl text-wine" />
             {onSale && (
-              <span className="text-base text-muted line-through">
-                {formatPrice(product.compareAtPrice!)}
-              </span>
+              <Price inr={product.compareAtPrice!} className="text-base text-muted line-through" />
             )}
             {product.badge && (
               <span className="bg-gold-soft/50 px-3 py-1 text-[10px] uppercase tracking-[2px] text-wine">

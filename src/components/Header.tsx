@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CartBadge } from './CartBadge'
+import { CurrencySwitcher } from './CurrencySwitcher'
 
 const NAV = [
   { label: 'Home', href: '/' },
@@ -65,6 +66,7 @@ export function Header() {
 
           {/* Right icons */}
           <div className="flex items-center justify-end gap-5">
+            <CurrencySwitcher />
             <IconButton label="Search" href="/search">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <circle cx="11" cy="11" r="7" />

@@ -55,6 +55,18 @@
 - **Customer accounts:** register / login / logout, `/account` dashboard with order history.
 - **SEO:** per-page metadata + canonicals, dynamic `sitemap.xml` (18 URLs) + `robots.txt`.
 
+## 2026-06-20 (INR base + multi-currency display)
+- **Base currency is now INR** — admin enters rupee prices (Products.price label updated).
+- Storefront shows each visitor's **local currency**, converted from INR. A `proxy.ts`
+  (renamed from the deprecated `middleware.ts`) maps the Vercel geo header
+  `x-vercel-ip-country` to a currency and stores it in a `pe_currency` cookie; a
+  `CurrencyProvider` + `<Price>` component format prices client-side, and a header
+  `CurrencySwitcher` lets visitors override.
+- `lib/format.ts` reworked to INR base (`FX_FROM_INR`, `formatMoney`, `currencyForCountry`).
+- Checkout + orders are INR throughout; product JSON-LD priceCurrency is INR.
+- NOTE: existing sample product prices (e.g. 189) now read as ₹189 — set real INR prices in
+  the admin (or bulk-adjust).
+
 ## 2026-06-20 (Razorpay checkout; Stripe dropped)
 - Built the no-redirect Razorpay popup checkout (Standard Checkout / Checkout.js). The modal
   opens over the storefront; the customer never leaves the site.

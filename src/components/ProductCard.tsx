@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { StoreProduct } from '@/lib/queries'
-import { formatPrice } from '@/lib/format'
+import { Price } from './Price'
 import { WishlistButton } from './WishlistButton'
 
 export function ProductCard({ product }: { product: StoreProduct }) {
@@ -45,11 +45,9 @@ export function ProductCard({ product }: { product: StoreProduct }) {
           </Link>
         </h3>
         <p className="flex items-center gap-2 text-sm">
-          <span className="text-wine">{formatPrice(product.price)}</span>
+          <Price inr={product.price} className="text-wine" />
           {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <span className="text-xs text-muted line-through">
-              {formatPrice(product.compareAtPrice)}
-            </span>
+            <Price inr={product.compareAtPrice} className="text-xs text-muted line-through" />
           )}
         </p>
       </div>

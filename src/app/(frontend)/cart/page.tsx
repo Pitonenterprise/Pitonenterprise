@@ -3,10 +3,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useStore } from '@/components/providers/StoreProvider'
-import { formatPrice } from '@/lib/format'
+import { useCurrency } from '@/components/providers/CurrencyProvider'
 
 export default function CartPage() {
   const { cart, setQuantity, removeFromCart, cartSubtotal, ready } = useStore()
+  const { format } = useCurrency()
 
   if (!ready) {
     return <main className="mx-auto max-w-[1000px] px-6 py-20 text-center text-muted">Loading…</main>
@@ -50,7 +51,7 @@ export default function CartPage() {
                     </h3>
                     {item.size && <p className="mt-1 text-xs uppercase tracking-[1.5px] text-muted">Size {item.size}</p>}
                   </div>
-                  <span className="text-wine">{formatPrice(item.price * item.quantity)}</span>
+                  <span className="text-wine">{format(item.price * item.quantity)}</span>
                 </div>
                 <div className="mt-auto flex items-center justify-between pt-4">
                   <div className="flex items-center rounded-full border border-foreground/20 text-sm">
@@ -73,7 +74,7 @@ export default function CartPage() {
           <dl className="mt-5 space-y-3 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted">Subtotal</dt>
-              <dd>{formatPrice(cartSubtotal)}</dd>
+              <dd>{format(cartSubtotal)}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted">Shipping</dt>

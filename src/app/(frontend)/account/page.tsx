@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { headers as nextHeaders } from 'next/headers'
 import { getPayloadClient } from '@/lib/payload'
-import { formatPrice } from '@/lib/format'
+import { formatINR } from '@/lib/format'
 import { LogoutButton } from '@/components/LogoutButton'
 
 // User-specific (reads the auth cookie), never prerender at build time.
@@ -76,7 +76,7 @@ export default async function AccountPage() {
                 <span className="rounded-full bg-gold-soft/40 px-3 py-1 text-[10px] uppercase tracking-[1.5px] text-wine">
                   {o.paymentStatus} · {o.fulfillmentStatus}
                 </span>
-                <span className="text-wine">{formatPrice(o.total)}</span>
+                <span className="text-wine">{formatINR(o.total)}</span>
               </div>
             </li>
           ))}

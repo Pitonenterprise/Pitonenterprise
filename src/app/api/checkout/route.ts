@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { enabledMethods, getRazorpay, type PaymentMethod } from '@/lib/payments'
-import { convertPrice } from '@/lib/format'
 import { shippingInrFor } from '@/lib/shipping'
 
 type IncomingItem = { productId: string | number; size?: string | null; quantity: number }
@@ -48,7 +47,7 @@ export async function POST(req: Request) {
     const product: any = byId.get(String(i.productId))
     if (!product || product.status !== 'active') continue
     const qty = Math.max(1, Math.min(20, Math.floor(i.quantity)))
-    const unitPrice = Math.round(convertPrice(product.price, 'INR'))
+    const unitPrice = Math.round(product.price) // already INR
     subtotal += unitPrice * qty
     lineItems.push({
       product: product.id,

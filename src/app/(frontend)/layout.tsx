@@ -4,6 +4,7 @@ import './globals.css'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { StoreProvider } from '@/components/providers/StoreProvider'
+import { CurrencyProvider } from '@/components/providers/CurrencyProvider'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
 
 // Design system fonts, Marcellus (display serif) + Jost (body sans).
@@ -45,11 +46,13 @@ export default function FrontendLayout({
     <html lang="en" className={`${marcellus.variable} ${jost.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <GoogleAnalytics />
-        <StoreProvider>
-          <Header />
-          <div className="flex-1">{children}</div>
-          <Footer />
-        </StoreProvider>
+        <CurrencyProvider>
+          <StoreProvider>
+            <Header />
+            <div className="flex-1">{children}</div>
+            <Footer />
+          </StoreProvider>
+        </CurrencyProvider>
       </body>
     </html>
   )

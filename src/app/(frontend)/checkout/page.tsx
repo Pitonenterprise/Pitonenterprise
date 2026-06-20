@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/components/providers/StoreProvider'
-import { formatINR, convertPrice } from '@/lib/format'
+import { formatINR } from '@/lib/format'
 import { isIndia, INDIA_SHIPPING_INR, INTERNATIONAL_SHIPPING_INR } from '@/lib/shipping'
 import type { PaymentMethod } from '@/lib/payments'
 
-const inr = (usd: number) => Math.round(convertPrice(usd, 'INR'))
+// Cart prices are already in INR (base currency).
+const inr = (n: number) => Math.round(n)
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
   razorpay: 'Card / UPI / Netbanking (Razorpay)',
