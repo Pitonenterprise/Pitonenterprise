@@ -19,6 +19,15 @@ export function convertPrice(baseUsd: number, currency: string): number {
   return baseUsd * rate
 }
 
+// Format a raw INR amount (already in rupees, not converted from USD).
+export function formatINR(amountInr: number): string {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amountInr)
+}
+
 export function formatPrice(baseUsd: number, currency = 'USD', locale = 'en'): string {
   const value = convertPrice(baseUsd, currency)
   try {

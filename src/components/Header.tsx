@@ -9,7 +9,6 @@ const NAV = [
   { label: 'Western', href: '/#western' },
 ]
 
-const FREE_SHIP_LABEL = '$150'
 
 function IconButton({
   label,
@@ -37,7 +36,7 @@ export function Header() {
     <>
       {/* Announcement bar */}
       <div className="bg-wine-deep px-4 py-[9px] text-center text-[11.5px] uppercase tracking-[2.5px] text-gold-soft">
-        Festive Edit is live · Free shipping over {FREE_SHIP_LABEL} · Easy 7-day returns
+        Festive Edit is live · Worldwide shipping · Easy 7-day returns
       </div>
 
       {/* Sticky header */}

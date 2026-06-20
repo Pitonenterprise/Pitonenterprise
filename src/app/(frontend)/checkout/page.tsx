@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/components/providers/StoreProvider'
-import { formatPrice } from '@/lib/format'
+import { formatINR, convertPrice } from '@/lib/format'
+import { isIndia, INDIA_SHIPPING_INR, INTERNATIONAL_SHIPPING_INR } from '@/lib/shipping'
 import type { PaymentMethod } from '@/lib/payments'
+
+const inr = (usd: number) => Math.round(convertPrice(usd, 'INR'))
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
   razorpay: 'Card / UPI / Netbanking (Razorpay)',
@@ -47,8 +50,10 @@ export default function CheckoutPage() {
       .catch(() => {})
   }, [])
 
-  const shipping = cartSubtotal >= 150 ? 0 : cartSubtotal > 0 ? 12 : 0
-  const total = cartSubtotal + shipping
+  // All amounts in INR. Shipping is flat per destination country.
+  const subtotalInr = inr(cartSubtotal)
+  const shippingInr = isIndia(form.country) ? INDIA_SHIPPING_INR : INTERNATIONAL_SHIPPING_INR
+  const totalInr = subtotalInr + shippingInr
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }))
@@ -187,8 +192,7 @@ export default function CheckoutPage() {
             </div>
             {method === 'razorpay' && (
               <p className="mt-3 text-xs text-muted">
-                Secure payment opens in a window on this page. Charged in INR:{' '}
-                <strong>{formatPrice(total, 'INR')}</strong>.
+                Secure payment opens in a window on this page (you stay on our site).
               </p>
             )}
             {!methods.includes('razorpay') && (
@@ -206,14 +210,17 @@ export default function CheckoutPage() {
             {cart.map((i) => (
               <li key={`${i.productId}-${i.size ?? ''}`} className="flex justify-between gap-2">
                 <span className="text-muted">{i.title}{i.size ? ` · ${i.size}` : ''} × {i.quantity}</span>
-                <span>{formatPrice(i.price * i.quantity)}</span>
+                <span>{formatINR(inr(i.price * i.quantity))}</span>
               </li>
             ))}
           </ul>
           <dl className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
-            <div className="flex justify-between"><dt className="text-muted">Subtotal</dt><dd>{formatPrice(cartSubtotal)}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted">Shipping</dt><dd>{shipping === 0 ? 'Free' : formatPrice(shipping)}</dd></div>
-            <div className="flex justify-between border-t border-line pt-2 text-base"><dt>Total</dt><dd className="text-wine">{formatPrice(total)}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted">Subtotal</dt><dd>{formatINR(subtotalInr)}</dd></div>
+            <div className="flex justify-between">
+              <dt className="text-muted">Shipping {isIndia(form.country) ? '(India)' : '(International)'}</dt>
+              <dd>{formatINR(shippingInr)}</dd>
+            </div>
+            <div className="flex justify-between border-t border-line pt-2 text-base"><dt>Total</dt><dd className="text-wine">{formatINR(totalInr)}</dd></div>
           </dl>
           {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
           <button type="submit" disabled={submitting} className="mt-6 block w-full rounded-full bg-wine py-3.5 text-center text-[12px] uppercase tracking-[1.5px] text-white transition hover:bg-wine-deep disabled:opacity-60">

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { enabledMethods, getRazorpay, type PaymentMethod } from '@/lib/payments'
 import { convertPrice } from '@/lib/format'
+import { shippingInrFor } from '@/lib/shipping'
 
 type IncomingItem = { productId: string | number; size?: string | null; quantity: number }
 type Body = {
@@ -39,13 +40,15 @@ export async function POST(req: Request) {
   })
   const byId = new Map(found.docs.map((d: any) => [String(d.id), d]))
 
+  // Everything is charged in INR. Convert product prices (USD base) to INR; shipping is
+  // flat per country (India vs international).
   const lineItems = []
-  let subtotal = 0
+  let subtotal = 0 // INR
   for (const i of items) {
     const product: any = byId.get(String(i.productId))
     if (!product || product.status !== 'active') continue
     const qty = Math.max(1, Math.min(20, Math.floor(i.quantity)))
-    const unitPrice = product.price
+    const unitPrice = Math.round(convertPrice(product.price, 'INR'))
     subtotal += unitPrice * qty
     lineItems.push({
       product: product.id,
@@ -60,14 +63,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No valid items' }, { status: 400 })
   }
 
-  // Shipping + tax from Settings.
   const settings: any = await payload.findGlobal({ slug: 'settings', overrideAccess: true }).catch(() => ({}))
-  const freeThreshold = settings?.freeShippingThreshold ?? 150
-  const flatShipping = settings?.flatShipping ?? 12
   const taxRate = settings?.taxRate ?? 0
-  const shipping = subtotal >= freeThreshold ? 0 : flatShipping
-  const tax = Math.round(subtotal * (taxRate / 100) * 100) / 100
-  const total = Math.round((subtotal + shipping + tax) * 100) / 100
+  const shipping = shippingInrFor(shippingAddress?.country) // INR
+  const tax = Math.round(subtotal * (taxRate / 100))
+  const total = subtotal + shipping + tax // INR
 
   // Create the order (pending until payment confirms; COD stays pending until delivery).
   const order = await payload.create({
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
     data: {
       email,
       items: lineItems,
-      currency: 'USD',
+      currency: 'INR',
       subtotal,
       shipping,
       tax,
@@ -96,8 +96,8 @@ export async function POST(req: Request) {
   if (method === 'razorpay') {
     const razorpay = await getRazorpay()
     if (!razorpay) return NextResponse.json({ error: 'Razorpay not configured' }, { status: 400 })
-    // Razorpay settles in INR. Convert the USD total to INR paise.
-    const amountInr = Math.round(convertPrice(total, 'INR') * 100)
+    // total is already in INR; Razorpay amount is in paise.
+    const amountInr = Math.round(total * 100)
     const rzpOrder = await razorpay.orders.create({
       amount: amountInr,
       currency: 'INR',
