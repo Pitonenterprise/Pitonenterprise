@@ -42,6 +42,17 @@ export default function CheckoutPage() {
     email: '', name: '', phone: '', line1: '', line2: '', city: '', state: '', postalCode: '', country: '',
   })
 
+  // Reuse a single pending "draft" order across payment attempts (avoids duplicates).
+  const [draftOrder, setDraftOrder] = useState<string | null>(null)
+  useEffect(() => {
+    setDraftOrder(localStorage.getItem('pe_draft_order'))
+  }, [])
+  const saveDraft = (n: string | null) => {
+    setDraftOrder(n)
+    if (n) localStorage.setItem('pe_draft_order', n)
+    else localStorage.removeItem('pe_draft_order')
+  }
+
   useEffect(() => {
     fetch('/api/checkout/methods')
       .then((r) => r.json())
@@ -111,6 +122,7 @@ export default function CheckoutPage() {
             })
             const vd = await v.json()
             if (!v.ok) throw new Error(vd.error || 'Payment verification failed')
+            saveDraft(null)
             clearCart()
             router.push(`/checkout/success?order=${data.orderNumber}`)
           } catch (err) {
@@ -145,6 +157,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           email: form.email,
           method,
+          draftOrderNumber: draftOrder || undefined,
           items: cart.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
           shippingAddress: {
             name: form.name, phone: form.phone, line1: form.line1, line2: form.line2,
@@ -160,11 +173,14 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error(data.error || 'Checkout failed')
 
       if (data.provider === 'razorpay') {
+        // Remember this pending order so a retry/switch reuses it instead of duplicating.
+        if (data.orderNumber) saveDraft(data.orderNumber)
         await openRazorpay(data) // opens the popup over this page; no redirect
         return
       }
 
       // Pay on Delivery — order is placed immediately.
+      saveDraft(null)
       clearCart()
       router.push(data.redirect || `/checkout/success?order=${data.orderNumber}`)
     } catch (err) {

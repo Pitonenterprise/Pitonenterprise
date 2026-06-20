@@ -9,6 +9,8 @@ type Body = {
   email: string
   method: PaymentMethod
   shippingAddress: Record<string, string>
+  // An existing pending order to reuse (avoids duplicates across payment attempts).
+  draftOrderNumber?: string
 }
 
 export async function POST(req: Request) {
@@ -19,7 +21,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { items, method, shippingAddress } = body
+  const { items, method, shippingAddress, draftOrderNumber } = body
   if (!items?.length) {
     return NextResponse.json({ error: 'Missing items' }, { status: 400 })
   }
@@ -76,25 +78,40 @@ export async function POST(req: Request) {
   const tax = Math.round(subtotal * (taxRate / 100))
   const total = subtotal + shipping + tax // INR
 
-  // Create the order (pending until payment confirms; COD stays pending until delivery).
-  const order = await payload.create({
-    collection: 'orders',
-    overrideAccess: true,
-    data: {
-      email,
-      customer: customerId,
-      items: lineItems,
-      currency: 'INR',
-      subtotal,
-      shipping,
-      tax,
-      total,
-      paymentProvider: method,
-      paymentStatus: 'pending',
-      fulfillmentStatus: 'processing',
-      shippingAddress,
-    },
-  })
+  const orderData = {
+    email,
+    customer: customerId,
+    items: lineItems,
+    currency: 'INR',
+    subtotal,
+    shipping,
+    tax,
+    total,
+    paymentProvider: method,
+    paymentStatus: 'pending' as const,
+    fulfillmentStatus: 'processing' as const,
+    shippingAddress,
+  }
+
+  // Reuse the customer's existing pending draft order (from a prior attempt) instead of
+  // creating a duplicate. Only reuse if it's theirs and still unpaid.
+  let order: any = null
+  if (draftOrderNumber) {
+    const existing = await payload.find({
+      collection: 'orders',
+      where: { orderNumber: { equals: draftOrderNumber } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const draft: any = existing.docs[0]
+    if (draft && String(draft.customer) === String(customerId) && draft.paymentStatus === 'pending') {
+      order = await payload.update({ collection: 'orders', id: draft.id, overrideAccess: true, data: orderData })
+    }
+  }
+  if (!order) {
+    order = await payload.create({ collection: 'orders', overrideAccess: true, data: orderData })
+  }
 
   // Initialize the gateway.
   if (method === 'cod') {
