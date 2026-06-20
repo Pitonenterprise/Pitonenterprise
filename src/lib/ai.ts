@@ -39,6 +39,48 @@ Rules:
 Respond ONLY with a JSON object with keys: title, description, seoTitle, seoDescription,
 fabric, color, occasions, pattern, badge, keywords.`
 
+// Generate concise ALT text for a product image (accessibility + image SEO).
+export async function generateAltText(imageDataUrl: string): Promise<string> {
+  if (!isAiEnabled()) throw new Error('OPENAI_API_KEY is not configured')
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+
+  const res = await fetch(OPENAI_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You write concise, descriptive ALT text for e-commerce product images (for ' +
+            'accessibility and image SEO) for a premium ethnic-wear store selling sarees, ' +
+            'kurtis and lehengas. Describe the garment type, colour, fabric and notable details ' +
+            'in ONE natural sentence, max 125 characters. Plain text only. Do not start with ' +
+            '"image of" or "photo of". No quotes.',
+        },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Write the ALT text for this product image.' },
+            { type: 'image_url', image_url: { url: imageDataUrl, detail: 'low' } },
+          ],
+        },
+      ],
+      temperature: 0.5,
+      max_tokens: 80,
+    }),
+  })
+
+  if (!res.ok) throw new Error(`OpenAI error ${res.status}`)
+  const data = await res.json()
+  const text = String(data?.choices?.[0]?.message?.content || '').trim().replace(/^["']|["']$/g, '')
+  return text.slice(0, 160)
+}
+
 export async function generateProductListing(input: {
   notes?: string
   imageDataUrl?: string
