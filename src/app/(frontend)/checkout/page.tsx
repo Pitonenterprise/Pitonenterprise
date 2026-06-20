@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/components/providers/StoreProvider'
+import { useCurrency } from '@/components/providers/CurrencyProvider'
 import { formatINR } from '@/lib/format'
 import { isIndia, INDIA_SHIPPING_INR, INTERNATIONAL_SHIPPING_INR } from '@/lib/shipping'
 import { COUNTRIES } from '@/data/countries'
@@ -32,6 +33,7 @@ function loadRazorpay(): Promise<boolean> {
 
 export default function CheckoutPage() {
   const { cart, cartSubtotal, clearCart, ready } = useStore()
+  const { format, currency } = useCurrency()
   const router = useRouter()
   const [methods, setMethods] = useState<PaymentMethod[]>(['cod'])
   const [method, setMethod] = useState<PaymentMethod>('cod')
@@ -236,18 +238,23 @@ export default function CheckoutPage() {
             {cart.map((i) => (
               <li key={`${i.productId}-${i.size ?? ''}`} className="flex justify-between gap-2">
                 <span className="text-muted">{i.title}{i.size ? ` · ${i.size}` : ''} × {i.quantity}</span>
-                <span>{formatINR(inr(i.price * i.quantity))}</span>
+                <span>{format(i.price * i.quantity)}</span>
               </li>
             ))}
           </ul>
           <dl className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
-            <div className="flex justify-between"><dt className="text-muted">Subtotal</dt><dd>{formatINR(subtotalInr)}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted">Subtotal</dt><dd>{format(subtotalInr)}</dd></div>
             <div className="flex justify-between">
               <dt className="text-muted">Shipping {isIndia(form.country) ? '(India)' : '(International)'}</dt>
-              <dd>{formatINR(shippingInr)}</dd>
+              <dd>{format(shippingInr)}</dd>
             </div>
-            <div className="flex justify-between border-t border-line pt-2 text-base"><dt>Total</dt><dd className="text-wine">{formatINR(totalInr)}</dd></div>
+            <div className="flex justify-between border-t border-line pt-2 text-base"><dt>Total</dt><dd className="text-wine">{format(totalInr)}</dd></div>
           </dl>
+          {currency !== 'INR' && (
+            <p className="mt-2 text-[10px] leading-snug text-muted">
+              Prices shown in {currency}. Your card is charged in Indian Rupees ({formatINR(totalInr)}) at the current exchange rate.
+            </p>
+          )}
           {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
           <button type="submit" disabled={submitting} className="mt-6 block w-full rounded-full bg-wine py-3.5 text-center text-[12px] uppercase tracking-[1.5px] text-white transition hover:bg-wine-deep disabled:opacity-60">
             {submitting ? 'Processing…' : method === 'cod' ? 'Place Order' : 'Pay Now'}
