@@ -55,6 +55,18 @@
 - **Customer accounts:** register / login / logout, `/account` dashboard with order history.
 - **SEO:** per-page metadata + canonicals, dynamic `sitemap.xml` (18 URLs) + `robots.txt`.
 
+## 2026-06-20 (Razorpay checkout; Stripe dropped)
+- Built the no-redirect Razorpay popup checkout (Standard Checkout / Checkout.js). The modal
+  opens over the storefront; the customer never leaves the site.
+  - `/api/checkout` creates the Razorpay order (now correctly converts the USD total to INR
+    paise — previous code under-charged by sending USD as INR).
+  - `/api/checkout/verify` verifies the payment signature (HMAC, timing-safe) and marks the
+    order paid; the Razorpay webhook remains a second confirmation.
+  - Checkout page loads Checkout.js, opens the modal, verifies, then shows the confirmation.
+  - **Stripe removed** — not available to Indian businesses. Razorpay accepts all countries
+    (charged in INR). PayPal is the likely future option for native international currency.
+  - Needs `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`.
+
 ## 2026-06-20 (Supabase Storage for uploads)
 - Fixed 500 on image uploads on the live site. Vercel's filesystem is read-only, so Payload's
   default local-disk uploads fail in production. Added a custom Payload cloud-storage adapter

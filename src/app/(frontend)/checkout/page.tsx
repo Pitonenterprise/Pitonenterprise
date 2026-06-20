@@ -8,9 +8,20 @@ import { formatPrice } from '@/lib/format'
 import type { PaymentMethod } from '@/lib/payments'
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
-  stripe: 'Card / Wallet (Stripe)',
-  razorpay: 'UPI / Card, India (Razorpay)',
+  razorpay: 'Card / UPI / Netbanking (Razorpay)',
   cod: 'Pay on Delivery',
+}
+
+// Loads Razorpay Checkout.js once; resolves when window.Razorpay is ready.
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && (window as any).Razorpay) return resolve(true)
+    const s = document.createElement('script')
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    s.onload = () => resolve(true)
+    s.onerror = () => resolve(false)
+    document.body.appendChild(s)
+  })
 }
 
 export default function CheckoutPage() {
@@ -42,6 +53,56 @@ export default function CheckoutPage() {
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }))
 
+  const openRazorpay = (data: any) =>
+    new Promise<void>(async (resolve) => {
+      const ok = await loadRazorpay()
+      if (!ok) {
+        setError('Could not load the payment gateway. Please try again.')
+        setSubmitting(false)
+        return resolve()
+      }
+      const rzp = new (window as any).Razorpay({
+        key: data.keyId,
+        amount: data.amountInr,
+        currency: data.currency || 'INR',
+        name: 'Piton Enterprise',
+        description: `Order ${data.orderNumber}`,
+        order_id: data.razorpayOrderId,
+        prefill: { name: form.name, email: form.email, contact: form.phone },
+        notes: { orderNumber: String(data.orderNumber) },
+        theme: { color: '#6e1f3b' },
+        handler: async (response: any) => {
+          try {
+            const v = await fetch('/api/checkout/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...response, orderNumber: data.orderNumber }),
+            })
+            const vd = await v.json()
+            if (!v.ok) throw new Error(vd.error || 'Payment verification failed')
+            clearCart()
+            router.push(`/checkout/success?order=${data.orderNumber}`)
+          } catch (err) {
+            setError((err as Error).message)
+            setSubmitting(false)
+          }
+          resolve()
+        },
+        modal: {
+          ondismiss: () => {
+            setError('Payment cancelled. Your order is saved as pending.')
+            setSubmitting(false)
+            resolve()
+          },
+        },
+      })
+      rzp.on('payment.failed', (resp: any) => {
+        setError(resp?.error?.description || 'Payment failed. Please try again.')
+        setSubmitting(false)
+      })
+      rzp.open()
+    })
+
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
@@ -63,20 +124,16 @@ export default function CheckoutPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Checkout failed')
 
-      // Card gateways would confirm via their SDK here using data.clientSecret /
-      // data.razorpayOrderId. With keys absent, only COD is offered, which is final now.
-      if (method === 'cod' && data.redirect) {
-        clearCart()
-        router.push(data.redirect)
+      if (data.provider === 'razorpay') {
+        await openRazorpay(data) // opens the popup over this page; no redirect
         return
       }
-      if (data.orderNumber) {
-        clearCart()
-        router.push(`/checkout/success?order=${data.orderNumber}`)
-      }
+
+      // Pay on Delivery — order is placed immediately.
+      clearCart()
+      router.push(data.redirect || `/checkout/success?order=${data.orderNumber}`)
     } catch (err) {
       setError((err as Error).message)
-    } finally {
       setSubmitting(false)
     }
   }
@@ -128,9 +185,15 @@ export default function CheckoutPage() {
                 </label>
               ))}
             </div>
-            {!methods.includes('stripe') && !methods.includes('razorpay') && (
+            {method === 'razorpay' && (
               <p className="mt-3 text-xs text-muted">
-                Card payments activate automatically once Stripe / Razorpay keys are added.
+                Secure payment opens in a window on this page. Charged in INR:{' '}
+                <strong>{formatPrice(total, 'INR')}</strong>.
+              </p>
+            )}
+            {!methods.includes('razorpay') && (
+              <p className="mt-3 text-xs text-muted">
+                Online card/UPI payments activate once Razorpay keys are added.
               </p>
             )}
           </section>
@@ -154,7 +217,7 @@ export default function CheckoutPage() {
           </dl>
           {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
           <button type="submit" disabled={submitting} className="mt-6 block w-full rounded-full bg-wine py-3.5 text-center text-[12px] uppercase tracking-[1.5px] text-white transition hover:bg-wine-deep disabled:opacity-60">
-            {submitting ? 'Placing order…' : 'Place Order'}
+            {submitting ? 'Processing…' : method === 'cod' ? 'Place Order' : 'Pay Now'}
           </button>
         </aside>
       </form>

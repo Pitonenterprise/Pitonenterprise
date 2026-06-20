@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
-import { enabledMethods, getStripe, getRazorpay, type PaymentMethod } from '@/lib/payments'
+import { enabledMethods, getRazorpay, type PaymentMethod } from '@/lib/payments'
+import { convertPrice } from '@/lib/format'
 
 type IncomingItem = { productId: string | number; size?: string | null; quantity: number }
 type Body = {
@@ -92,30 +93,27 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, orderNumber: order.orderNumber, redirect: `/checkout/success?order=${order.orderNumber}` })
   }
 
-  if (method === 'stripe') {
-    const stripe = await getStripe()
-    if (!stripe) return NextResponse.json({ error: 'Stripe not configured' }, { status: 400 })
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(total * 100),
-      currency: 'usd',
-      receipt_email: email,
-      metadata: { orderId: String(order.id), orderNumber: String(order.orderNumber) },
-    })
-    await payload.update({ collection: 'orders', id: order.id, overrideAccess: true, data: { providerRef: intent.id } })
-    return NextResponse.json({ ok: true, orderNumber: order.orderNumber, provider: 'stripe', clientSecret: intent.client_secret })
-  }
-
   if (method === 'razorpay') {
     const razorpay = await getRazorpay()
     if (!razorpay) return NextResponse.json({ error: 'Razorpay not configured' }, { status: 400 })
+    // Razorpay settles in INR. Convert the USD total to INR paise.
+    const amountInr = Math.round(convertPrice(total, 'INR') * 100)
     const rzpOrder = await razorpay.orders.create({
-      amount: Math.round(total * 100),
-      currency: 'INR', // Razorpay settles in INR
+      amount: amountInr,
+      currency: 'INR',
       receipt: String(order.orderNumber),
       notes: { orderId: String(order.id) },
     })
     await payload.update({ collection: 'orders', id: order.id, overrideAccess: true, data: { providerRef: rzpOrder.id } })
-    return NextResponse.json({ ok: true, orderNumber: order.orderNumber, provider: 'razorpay', razorpayOrderId: rzpOrder.id, keyId: process.env.RAZORPAY_KEY_ID })
+    return NextResponse.json({
+      ok: true,
+      orderNumber: order.orderNumber,
+      provider: 'razorpay',
+      razorpayOrderId: rzpOrder.id,
+      keyId: process.env.RAZORPAY_KEY_ID,
+      amountInr,
+      currency: 'INR',
+    })
   }
 
   return NextResponse.json({ error: 'Unsupported method' }, { status: 400 })
