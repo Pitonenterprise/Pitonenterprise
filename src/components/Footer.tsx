@@ -14,7 +14,6 @@ const COLUMNS = [
     title: 'Help',
     links: [
       { label: 'Shipping & Returns', href: '/shipping' },
-      { label: 'Size Guide', href: '/size-guide' },
       { label: 'Track Order', href: '/account' },
       { label: 'Contact Us', href: '/contact' },
     ],
