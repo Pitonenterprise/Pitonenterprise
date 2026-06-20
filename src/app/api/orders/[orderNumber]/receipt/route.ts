@@ -87,8 +87,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderNum
   <div class="actions"><button onclick="window.print()">⬇ Save as PDF / Print</button></div>
   <div class="sheet">
     <div class="top">
-      <div class="brand">Piton Enterprise<small>Handcrafted Wear</small></div>
-      <div class="meta"><strong>Receipt</strong><br>${esc(order.orderNumber)}<br>${esc(date)}</div>
+      <div class="meta" style="text-align:left"><strong>Receipt</strong> · ${esc(order.orderNumber)} · ${esc(date)}</div>
     </div>
 
     <h2>${esc(orderHeadline(order))}</h2>
