@@ -55,6 +55,17 @@
 - **Customer accounts:** register / login / logout, `/account` dashboard with order history.
 - **SEO:** per-page metadata + canonicals, dynamic `sitemap.xml` (18 URLs) + `robots.txt`.
 
+## 2026-06-20 (AI listing assistant)
+- Added an **AI Listing Assistant** to the Payload product editor. Staff upload an image and/or
+  type rough notes, click "Generate with AI", and OpenAI writes an SEO-optimized title,
+  description (Lexical rich text), meta title/description, attributes (fabric, colour, occasions,
+  pattern, badge) and suggested keywords, then auto-fills the form for review before saving.
+  - `src/lib/ai.ts` (provider-isolated OpenAI vision+text generator), admin-guarded route
+    `/api/ai/generate-product` (resolves the uploaded image to a base64 data URL), and a custom
+    admin UI field `src/admin/AIProductAssistant.tsx`.
+  - Requires `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-4o-mini`). Add it in Vercel
+    for production.
+
 ## 2026-06-20 (later)
 - **Implemented the "Piton Enterprise" design** from the Claude Design project
   (`claude_design` MCP, project "Women's saree and dress site"). The source `.dc.html`
