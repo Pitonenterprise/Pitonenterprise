@@ -2,6 +2,13 @@
 
 > Running log of notable changes, newest first. Update with every meaningful change.
 
+## 2026-06-20 (account-synced cart + wishlist)
+- Cart + wishlist now follow the customer across devices. `Customers` gained a `cart` array
+  (alongside the existing `wishlist` relationship). `/api/account/cart` GET/PUT (auth-guarded)
+  load/save it. `StoreProvider` detects an active session, merges the guest/browser cart with
+  the account cart on login (union, higher quantity per line), autosaves on change (debounced),
+  and clears local state on logout (data is preserved in the account). Tested via API.
+
 ## 2026-06-20 (email OTP verification)
 - **Added email OTP verification for customer signup** (was previously instant/no verification).
   - `Customers`: new `isVerified` + hidden OTP fields (`otpHash`, `otpExpiresAt`, `otpAttempts`);
