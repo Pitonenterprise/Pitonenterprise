@@ -3,22 +3,6 @@
 import { useState } from 'react'
 import { useForm } from '@payloadcms/ui'
 
-// Convert plain text into a minimal Lexical editor state for the `description` richText field.
-function textToLexical(text: string) {
-  const paragraphs = text.split(/\n\n+/).map((s) => s.trim()).filter(Boolean)
-  const children = (paragraphs.length ? paragraphs : ['']).map((p) => ({
-    type: 'paragraph',
-    format: '',
-    indent: 0,
-    version: 1,
-    direction: 'ltr',
-    textFormat: 0,
-    textStyle: '',
-    children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: p, version: 1 }],
-  }))
-  return { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children } }
-}
-
 export function AIProductAssistant() {
   const { dispatchFields, getDataByPath, setModified } = useForm()
   const [notes, setNotes] = useState('')
@@ -46,7 +30,7 @@ export function AIProductAssistant() {
       const set = (path: string, value: unknown) => dispatchFields({ type: 'UPDATE', path, value })
 
       if (l.title) set('title', l.title)
-      if (l.description) set('description', textToLexical(l.description))
+      if (l.description) set('description', l.description)
       if (l.fabric) set('fabric', l.fabric)
       if (l.color) set('color', l.color)
       if (l.pattern) set('pattern', l.pattern)

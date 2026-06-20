@@ -130,6 +130,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <span>Save to wishlist</span>
           </div>
 
+          {/* Description */}
+          {typeof product.description === 'string' && product.description.trim() && (
+            <div className="mt-10 space-y-4 border-t border-line pt-8 text-[15px] leading-[1.9] text-foreground/80">
+              {product.description
+                .split(/\n\n+|\n/)
+                .map((para) => para.trim())
+                .filter(Boolean)
+                .map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
+            </div>
+          )}
+
           {/* Details */}
           <dl className="mt-10 space-y-3 border-t border-line pt-8 text-sm">
             {product.fabric && (

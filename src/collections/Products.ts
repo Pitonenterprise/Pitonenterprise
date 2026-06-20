@@ -46,8 +46,12 @@ export const Products: CollectionConfig = {
     slugField('title'),
     {
       name: 'description',
-      type: 'richText',
+      type: 'textarea',
       localized: true,
+      admin: {
+        rows: 6,
+        description: 'Product description (the AI Assistant can write this for you).',
+      },
     },
     {
       name: 'images',
