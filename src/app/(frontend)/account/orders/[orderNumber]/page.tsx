@@ -63,7 +63,7 @@ export default async function OrderDetailPage({
         <Link href="/account" className="text-[12px] uppercase tracking-[1.5px] text-muted hover:text-wine">
           ← Back to account
         </Link>
-        <DownloadReceiptButton />
+        <DownloadReceiptButton orderNumber={order.orderNumber} />
       </div>
 
       {/* Receipt body */}
