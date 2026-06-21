@@ -1,23 +1,26 @@
 # Payments
 
-> Two providers: Stripe (international) + Razorpay (India). Keep current as integration lands.
+> **Razorpay only** (charges in INR). Stripe was dropped — it is not available to Indian
+> businesses. PayPal is a likely future option for native non-INR checkout.
 
-## Provider routing
-- Default to **Stripe** for international customers (multi-currency cards, Apple/Google Pay).
-- Use **Razorpay** for India (UPI, Indian cards, netbanking, INR).
-- Selection: based on customer country / chosen currency at checkout (final logic TBD).
+## Currency
+- The store charges in **INR**. Product prices are stored in INR (base currency); the storefront
+  shows each visitor's local currency, but checkout/charge is INR. See I18N.md.
+- Shipping is flat per destination: **₹50 (India) / ₹2,500 (international)** — `lib/shipping.ts`.
 
-## Flow (both providers)
-1. Customer reviews cart → checkout.
-2. Server creates a payment intent/order with the chosen provider (amount in correct currency).
-3. Client completes payment with the provider's SDK/checkout.
-4. Provider calls our **webhook** on success/failure.
-5. Webhook verifies signature → creates/updates the `Order` in Payload → triggers confirmation.
+## Flow (Razorpay Standard Checkout — no redirect)
+1. Login is required to order; checkout is auth-gated and linked to the customer.
+2. Server (`/api/checkout`) recomputes totals in INR, creates/updates a pending Order, and
+   creates a Razorpay **order** (amount in paise). Reuses a pending "draft" order on retries.
+3. Client opens the **Razorpay Checkout popup** over the site (no redirect).
+4. On success, `/api/checkout/verify` verifies the signature (HMAC, timing-safe) and marks the
+   order **paid**. Pay-on-Delivery places the order immediately (paid on delivery).
+5. `POST /api/webhooks/razorpay` (verified with `RAZORPAY_WEBHOOK_SECRET`) is a second,
+   independent confirmation. Never trust the client for payment status.
 
-## Webhooks
-- `POST /api/webhooks/stripe` — verify with `STRIPE_WEBHOOK_SECRET`.
-- `POST /api/webhooks/razorpay` — verify with `RAZORPAY_WEBHOOK_SECRET`.
-- Webhooks are the **source of truth** for order payment status (never trust the client).
+## Env
+- `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (test keys set in dev;
+  use live keys + webhook secret in Vercel for production).
 
 ## Security
 - Never expose secret keys to the client (only publishable/key-id values).

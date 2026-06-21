@@ -2,6 +2,28 @@
 
 > Running log of notable changes, newest first. Update with every meaningful change.
 
+## 2026-06-20 (checkout, orders, receipts, product IDs, polish)
+- **Login required to order.** `/api/checkout` rejects guests (`401 login_required`) and links
+  the order to the customer; checkout page checks auth, prefills from the account, and redirects
+  guests to login (`?redirect=/checkout`).
+- **No duplicate orders.** Checkout reuses the customer's pending "draft" order across payment
+  attempts (e.g. Razorpay abandoned → COD) instead of creating a new one.
+- **Country-based shipping in INR:** flat ₹50 (India) / ₹2,500 (international), `lib/shipping.ts`.
+  Checkout computes everything in INR; shows the visitor's currency with a small "charged in
+  INR" note.
+- **Product ID (SKU):** `Products.sku` (unique, auto-assigned `PE-00001` on create, editable);
+  shown in admin list + on the product page. Existing products backfilled.
+- **Order detail page** `/account/orders/[orderNumber]` with friendly status (`lib/orderStatus.ts`:
+  "Order confirmed", "Pay on delivery", stepper Confirmed→Shipped→Delivered) and a
+  **downloadable single-page receipt** (`/api/orders/[orderNumber]/receipt`, standalone HTML
+  with product IDs, totals, address; auto-opens print/Save-as-PDF).
+- **Address autocomplete** at checkout (`/api/address/suggest`): keyless Photon/OSM by default,
+  upgrades to Geoapify if `GEOAPIFY_API_KEY` is set. Plus a **country dropdown** (`data/countries.ts`).
+- **Google Analytics** (gtag `G-9QLHH69HD3`) on storefront pages via `next/script`; admin untracked.
+- **Settings.heroImages** array → homepage **hero slideshow** (`HeroSlideshow`, crossfade every 2s).
+- Content tweaks: removed footer "Size Guide", About "Manufacturing Unit"/"Retail Shop" stats,
+  receipt letterhead + button icon; hero headline → "Where tradition meets timeless beauty".
+
 ## 2026-06-20 (content pages)
 - Added **About / Our Story** page (`/about`) — founded 2006, grew from 1 employee to 50
   artisans, own manufacturing unit + retail shop, ships worldwide. SEO metadata + stats strip.
