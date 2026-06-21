@@ -4,10 +4,10 @@ import { CurrencySwitcher } from './CurrencySwitcher'
 
 const NAV = [
   { label: 'Home', href: '/' },
-  { label: 'Sarees', href: '/#sarees' },
-  { label: 'Kurtis', href: '/#kurtis' },
-  { label: 'Lehengas', href: '/#lehengas' },
-  { label: 'Western', href: '/#western' },
+  { label: 'Sarees', href: '/products/category/sarees' },
+  { label: 'Kurtis', href: '/products/category/kurtis' },
+  { label: 'Lehengas', href: '/products/category/lehengas' },
+  { label: 'Western', href: '/products/category/western' },
 ]
 
 
