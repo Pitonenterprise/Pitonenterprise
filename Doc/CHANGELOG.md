@@ -24,6 +24,14 @@
 - Content tweaks: removed footer "Size Guide", About "Manufacturing Unit"/"Retail Shop" stats,
   receipt letterhead + button icon; hero headline → "Where tradition meets timeless beauty".
 
+## 2026-06-21 (SEO infra)
+- `sitemap.ts`: now `force-dynamic` (fresh from DB per request), includes static pages
+  (home, products, about, contact, shipping, privacy, terms) + all categories + all products,
+  with real `lastModified` from each doc's `updatedAt` (added `updatedAt` to the data layer).
+- `robots.ts`: also disallow `/wishlist`.
+- Product page: added **BreadcrumbList** JSON-LD and `sku` on the Product schema (alongside
+  the existing Product offer/availability schema, per-page canonical + metadata).
+
 ## 2026-06-20 (keep-alive)
 - Added `/api/health` (force-dynamic; does a 1-row DB read) and a daily GitHub Action
   (`.github/workflows/keep-alive.yml`, cron 03:30 UTC = 09:00 IST) that pings it so the

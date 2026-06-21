@@ -24,6 +24,7 @@ export type StoreProduct = {
   description?: unknown
   occasions?: string[]
   careInstructions?: string | null
+  updatedAt?: string | null
 }
 
 export type StoreCategory = {
@@ -33,6 +34,7 @@ export type StoreCategory = {
   description?: string | null
   accentColor?: string | null
   image: StoreImage
+  updatedAt?: string | null
 }
 
 function toImage(img: unknown): StoreImage {
@@ -70,6 +72,7 @@ function mapProduct(doc: Record<string, any>): StoreProduct {
     description: doc.description ?? null,
     occasions: doc.occasions ?? [],
     careInstructions: doc.careInstructions ?? null,
+    updatedAt: doc.updatedAt ?? null,
   }
 }
 
@@ -81,6 +84,7 @@ function mapCategory(doc: Record<string, any>): StoreCategory {
     description: doc.description ?? null,
     accentColor: doc.accentColor ?? null,
     image: toImage(doc.image),
+    updatedAt: doc.updatedAt ?? null,
   }
 }
 

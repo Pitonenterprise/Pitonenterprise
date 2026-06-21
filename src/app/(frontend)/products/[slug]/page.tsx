@@ -53,6 +53,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     name: product.title,
     image: product.image?.url ? [product.image.url] : undefined,
     description: `${product.title}${product.fabric ? ` in ${product.fabric}` : ''}`,
+    sku: product.sku || undefined,
     brand: { '@type': 'Brand', name: 'Piton Enterprise' },
     category: product.categoryTitle || undefined,
     offers: {
@@ -67,9 +68,33 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     },
   }
 
+  // Breadcrumb structured data: Home › Category › Product.
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+      ...(product.categorySlug
+        ? [{
+            '@type': 'ListItem',
+            position: 2,
+            name: product.categoryTitle,
+            item: `${siteUrl}/products/category/${product.categorySlug}`,
+          }]
+        : []),
+      {
+        '@type': 'ListItem',
+        position: product.categorySlug ? 3 : 2,
+        name: product.title,
+        item: `${siteUrl}/products/${product.slug}`,
+      },
+    ],
+  }
+
   return (
     <main className="mx-auto max-w-[1280px] px-6 py-10 md:px-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-2 text-[11px] uppercase tracking-[1.5px] text-muted">
