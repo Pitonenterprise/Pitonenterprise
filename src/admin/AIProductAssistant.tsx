@@ -9,11 +9,13 @@ export function AIProductAssistant() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<string[] | null>(null)
+  const [inferred, setInferred] = useState<string[]>([])
 
   const generate = async () => {
     setLoading(true)
     setError(null)
     setDone(null)
+    setInferred([])
     try {
       const mediaId = getDataByPath('images.0.image') as string | number | undefined
 
@@ -34,13 +36,13 @@ export function AIProductAssistant() {
       if (l.fabric) set('fabric', l.fabric)
       if (l.color) set('color', l.color)
       if (l.pattern) set('pattern', l.pattern)
-      if (l.badge) set('badge', l.badge)
       if (Array.isArray(l.occasions) && l.occasions.length) set('occasions', l.occasions)
       if (l.seoTitle) set('seo.metaTitle', l.seoTitle)
       if (l.seoDescription) set('seo.metaDescription', l.seoDescription)
 
       setModified(true)
       setDone(Array.isArray(l.keywords) ? l.keywords : [])
+      setInferred(Array.isArray(l.inferred) ? l.inferred : [])
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -107,6 +109,11 @@ export function AIProductAssistant() {
           </span>
         )}
       </div>
+      {inferred.length > 0 && (
+        <p style={{ fontSize: 11, color: '#b8860b', marginTop: 8 }}>
+          ⚠ AI guessed from the image (please verify): {inferred.join(', ')}
+        </p>
+      )}
       {done && done.length > 0 && (
         <p style={{ fontSize: 11, opacity: 0.7, marginTop: 8 }}>
           Suggested keywords: {done.join(', ')}
