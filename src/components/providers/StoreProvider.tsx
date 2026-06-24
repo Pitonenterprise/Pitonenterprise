@@ -6,10 +6,11 @@ export type CartItem = {
   productId: string | number
   slug: string
   title: string
-  price: number // base USD
+  price: number // base INR
   image?: string | null
   accentColor?: string | null
   size?: string | null
+  color?: string | null
   quantity: number
 }
 
@@ -17,8 +18,8 @@ type StoreState = {
   cart: CartItem[]
   wishlist: (string | number)[]
   addToCart: (item: Omit<CartItem, 'quantity'>, qty?: number) => void
-  removeFromCart: (productId: string | number, size?: string | null) => void
-  setQuantity: (productId: string | number, size: string | null | undefined, qty: number) => void
+  removeFromCart: (productId: string | number, size?: string | null, color?: string | null) => void
+  setQuantity: (productId: string | number, size: string | null | undefined, color: string | null | undefined, qty: number) => void
   clearCart: () => void
   toggleWishlist: (productId: string | number) => void
   isWishlisted: (productId: string | number) => boolean
@@ -35,8 +36,12 @@ const StoreContext = createContext<StoreState | null>(null)
 const CART_KEY = 'pe_cart'
 const WISH_KEY = 'pe_wishlist'
 
-function sameLine(a: CartItem, productId: string | number, size?: string | null) {
-  return a.productId === productId && (a.size ?? null) === (size ?? null)
+function sameLine(a: CartItem, productId: string | number, size?: string | null, color?: string | null) {
+  return (
+    a.productId === productId &&
+    (a.size ?? null) === (size ?? null) &&
+    (a.color ?? null) === (color ?? null)
+  )
 }
 
 // Merge two carts: union of lines, keeping the higher quantity per line (avoids
@@ -44,7 +49,7 @@ function sameLine(a: CartItem, productId: string | number, size?: string | null)
 function mergeCarts(local: CartItem[], account: CartItem[]): CartItem[] {
   const out = [...account]
   for (const li of local) {
-    const idx = out.findIndex((a) => sameLine(a, li.productId, li.size))
+    const idx = out.findIndex((a) => sameLine(a, li.productId, li.size, li.color))
     if (idx > -1) out[idx] = { ...out[idx], quantity: Math.max(out[idx].quantity, li.quantity) }
     else out.push(li)
   }
@@ -126,7 +131,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cart: cart.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
+          cart: cart.map((i) => ({ productId: i.productId, size: i.size, color: i.color, quantity: i.quantity })),
           wishlist,
         }),
       }).catch(() => {})
@@ -136,7 +141,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart: StoreState['addToCart'] = useCallback((item, qty = 1) => {
     setCart((prev) => {
-      const idx = prev.findIndex((p) => sameLine(p, item.productId, item.size))
+      const idx = prev.findIndex((p) => sameLine(p, item.productId, item.size, item.color))
       if (idx > -1) {
         const next = [...prev]
         next[idx] = { ...next[idx], quantity: next[idx].quantity + qty }
@@ -146,14 +151,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  const removeFromCart: StoreState['removeFromCart'] = useCallback((productId, size) => {
-    setCart((prev) => prev.filter((p) => !sameLine(p, productId, size)))
+  const removeFromCart: StoreState['removeFromCart'] = useCallback((productId, size, color) => {
+    setCart((prev) => prev.filter((p) => !sameLine(p, productId, size, color)))
   }, [])
 
-  const setQuantity: StoreState['setQuantity'] = useCallback((productId, size, qty) => {
+  const setQuantity: StoreState['setQuantity'] = useCallback((productId, size, color, qty) => {
     setCart((prev) =>
       prev
-        .map((p) => (sameLine(p, productId, size) ? { ...p, quantity: Math.max(0, qty) } : p))
+        .map((p) => (sameLine(p, productId, size, color) ? { ...p, quantity: Math.max(0, qty) } : p))
         .filter((p) => p.quantity > 0),
     )
   }, [])

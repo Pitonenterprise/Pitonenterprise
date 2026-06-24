@@ -21,7 +21,7 @@ export const Media: CollectionConfig = {
         if ((operation === 'create' || operation === 'update') && needsAlt && incoming?.data && isAiEnabled()) {
           try {
             const dataUrl = `data:${incoming.mimetype || 'image/jpeg'};base64,${incoming.data.toString('base64')}`
-            const alt = await generateAltText(dataUrl)
+            const alt = await generateAltText({ imageDataUrl: dataUrl })
             if (alt) data.alt = alt
           } catch {
             // Non-fatal: leave alt empty; it can be filled manually.

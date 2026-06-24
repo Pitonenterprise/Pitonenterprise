@@ -49,17 +49,21 @@ export default function CartPage() {
                     <h3 className="font-display text-lg text-foreground">
                       <Link href={`/products/${item.slug}`} className="hover:text-wine">{item.title}</Link>
                     </h3>
-                    {item.size && <p className="mt-1 text-xs uppercase tracking-[1.5px] text-muted">Size {item.size}</p>}
+                    {(item.color || item.size) && (
+                      <p className="mt-1 text-xs uppercase tracking-[1.5px] text-muted">
+                        {item.color}{item.color && item.size ? ' · ' : ''}{item.size ? `Size ${item.size}` : ''}
+                      </p>
+                    )}
                   </div>
                   <span className="text-wine">{format(item.price * item.quantity)}</span>
                 </div>
                 <div className="mt-auto flex items-center justify-between pt-4">
                   <div className="flex items-center rounded-full border border-foreground/20 text-sm">
-                    <button aria-label="Decrease" onClick={() => setQuantity(item.productId, item.size, item.quantity - 1)} className="px-3 py-1.5">−</button>
+                    <button aria-label="Decrease" onClick={() => setQuantity(item.productId, item.size, item.color, item.quantity - 1)} className="px-3 py-1.5">−</button>
                     <span className="w-8 text-center">{item.quantity}</span>
-                    <button aria-label="Increase" onClick={() => setQuantity(item.productId, item.size, item.quantity + 1)} className="px-3 py-1.5">+</button>
+                    <button aria-label="Increase" onClick={() => setQuantity(item.productId, item.size, item.color, item.quantity + 1)} className="px-3 py-1.5">+</button>
                   </div>
-                  <button onClick={() => removeFromCart(item.productId, item.size)} className="text-xs uppercase tracking-[1.5px] text-muted underline hover:text-wine">
+                  <button onClick={() => removeFromCart(item.productId, item.size, item.color)} className="text-xs uppercase tracking-[1.5px] text-muted underline hover:text-wine">
                     Remove
                   </button>
                 </div>

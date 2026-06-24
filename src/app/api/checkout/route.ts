@@ -3,7 +3,7 @@ import { getPayloadClient } from '@/lib/payload'
 import { enabledMethods, getRazorpay, type PaymentMethod } from '@/lib/payments'
 import { shippingInrFor } from '@/lib/shipping'
 
-type IncomingItem = { productId: string | number; size?: string | null; quantity: number }
+type IncomingItem = { productId: string | number; size?: string | null; color?: string | null; quantity: number }
 type Body = {
   items: IncomingItem[]
   email: string
@@ -62,6 +62,7 @@ export async function POST(req: Request) {
     lineItems.push({
       product: product.id,
       title: product.title,
+      color: i.color || undefined,
       size: i.size || undefined,
       quantity: qty,
       unitPrice,

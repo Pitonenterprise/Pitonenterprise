@@ -51,10 +51,11 @@ export const Orders: CollectionConfig = {
         {
           type: 'row',
           fields: [
-            { name: 'title', type: 'text', required: true, admin: { width: '40%' } },
-            { name: 'size', type: 'text', admin: { width: '20%' } },
-            { name: 'quantity', type: 'number', required: true, min: 1, admin: { width: '20%' } },
-            { name: 'unitPrice', type: 'number', required: true, admin: { width: '20%' } },
+            { name: 'title', type: 'text', required: true, admin: { width: '35%' } },
+            { name: 'color', type: 'text', admin: { width: '20%' } },
+            { name: 'size', type: 'text', admin: { width: '15%' } },
+            { name: 'quantity', type: 'number', required: true, min: 1, admin: { width: '15%' } },
+            { name: 'unitPrice', type: 'number', required: true, admin: { width: '15%' } },
           ],
         },
       ],

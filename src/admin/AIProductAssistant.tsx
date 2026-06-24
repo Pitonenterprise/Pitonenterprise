@@ -10,14 +10,44 @@ export function AIProductAssistant() {
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<string[] | null>(null)
   const [inferred, setInferred] = useState<string[]>([])
+  const [altStatus, setAltStatus] = useState<string | null>(null)
+
+  // Generate keyword-anchored ALT text for every color photo (one vision call each).
+  const generateAltForAllPhotos = async (title?: string, fabric?: string) => {
+    const colors = (getDataByPath('colors') as any[]) || []
+    const photos: { mediaId: string | number; color: string }[] = []
+    for (const c of colors) {
+      for (const img of (c?.images as any[]) || []) {
+        const mid = img?.image && typeof img.image === 'object' ? img.image.id : img?.image
+        if (mid != null) photos.push({ mediaId: mid, color: c?.name || '' })
+      }
+    }
+    if (!photos.length) return
+    setAltStatus(`Writing alt text for ${photos.length} photo(s)…`)
+    const results = await Promise.all(
+      photos.map((p) =>
+        fetch('/api/ai/generate-alt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ mediaId: p.mediaId, color: p.color, title, fabric }),
+        })
+          .then((r) => r.ok)
+          .catch(() => false),
+      ),
+    )
+    setAltStatus(`Alt text written for ${results.filter(Boolean).length}/${photos.length} photo(s) ✓`)
+  }
 
   const generate = async () => {
     setLoading(true)
     setError(null)
     setDone(null)
     setInferred([])
+    setAltStatus(null)
     try {
-      const mediaId = getDataByPath('images.0.image') as string | number | undefined
+      // First photo of the first color (the new unified Colors section).
+      const mediaId = getDataByPath('colors.0.images.0.image') as string | number | undefined
 
       const res = await fetch('/api/ai/generate-product', {
         method: 'POST',
@@ -43,6 +73,9 @@ export function AIProductAssistant() {
       setModified(true)
       setDone(Array.isArray(l.keywords) ? l.keywords : [])
       setInferred(Array.isArray(l.inferred) ? l.inferred : [])
+
+      // Then write SEO alt text for every color photo, using the new title/fabric for keywords.
+      await generateAltForAllPhotos(l.title, l.fabric)
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -109,6 +142,9 @@ export function AIProductAssistant() {
           </span>
         )}
       </div>
+      {altStatus && (
+        <p style={{ fontSize: 11, color: '#1e7e45', marginTop: 8 }}>{altStatus}</p>
+      )}
       {inferred.length > 0 && (
         <p style={{ fontSize: 11, color: '#b8860b', marginTop: 8 }}>
           ⚠ AI guessed from the image (please verify): {inferred.join(', ')}

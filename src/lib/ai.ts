@@ -25,6 +25,58 @@ export type GeneratedListing = {
 
 export const isAiEnabled = () => !!process.env.OPENAI_API_KEY
 
+const ALT_SYSTEM = `You write concise, SEO-friendly image ALT TEXT for a premium ethnic-wear store.
+Rules:
+- Max 125 characters.
+- Lead with the color, fabric and garment type, then briefly note what is distinctly visible in
+  THIS specific photo (e.g. full drape, pallu, border, blouse, embroidery close-up).
+- Natural language, no keyword stuffing, no quotes. Never start with "image of" or "photo of".
+- American spelling; keep ethnic terms (saree, kurti, lehenga, dupatta).
+Return ONLY the alt text, nothing else.`
+
+// Generate a unique, keyword-anchored ALT for one product photo (vision + product context).
+export async function generateAltText(input: {
+  imageDataUrl: string
+  title?: string
+  fabric?: string
+  color?: string
+}): Promise<string> {
+  if (!isAiEnabled()) throw new Error('OPENAI_API_KEY is not configured')
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  const ctx = `Product: ${input.title || ''} | Fabric: ${input.fabric || ''} | Color: ${input.color || ''}`
+
+  const res = await fetch(OPENAI_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: ALT_SYSTEM },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: `${ctx}\nWrite the alt text for THIS photo.` },
+            { type: 'image_url', image_url: { url: input.imageDataUrl, detail: 'low' } },
+          ],
+        },
+      ],
+      temperature: 0.5,
+      max_tokens: 80,
+    }),
+  })
+
+  if (!res.ok) throw new Error(`OpenAI error ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  const data = await res.json()
+  const alt = String(data?.choices?.[0]?.message?.content || '')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+    .replace(/\s+/g, ' ')
+  return alt.slice(0, 125)
+}
+
 // Trim to a max length without cutting a word in half.
 function trimToWord(s: string, max: number): string {
   const t = s.trim()
@@ -64,11 +116,14 @@ WRITING STYLE
 - Description: 2-3 short paragraphs covering fabric, work/craftsmanship, occasion, styling, fit.
 
 TITLE FORMAT (follow exactly)
-- "[Color] [Fabric] [Garment Type] with [one key work/detail]". Front-load color, fabric and
-  garment type (highest-intent search terms). Add the single most distinctive work/detail
-  (e.g. "Hand & Cut Work", "Zari Border", "Mirror Work") — not three. Exclude catalog/brand
-  names. Max 60 characters. Append an occasion suffix (e.g. " — Party Wear") only if it fits.
-  Example: "Emerald Soft Satin Silk Saree with Hand & Cut Work".
+- "[Fabric] [Garment Type] with [one key work/detail]". The title MUST be COLOR-NEUTRAL — do
+  NOT include any color word in the title (the same listing is sold in several colors, which
+  the shopper picks on the page). Front-load fabric and garment type (highest-intent search
+  terms). Add the single most distinctive work/detail (e.g. "Hand & Cut Work", "Zari Border",
+  "Mirror Work") — not three. Exclude catalog/brand names. Max 60 characters. Append an
+  occasion suffix (e.g. " — Party Wear") only if it fits.
+  Example: "Soft Satin Silk Saree with Hand & Cut Work".
+- "seoTitle" must also be color-neutral, following the same rule.
 
 FIELDS
 - "color": use the color from notes; if silent, infer the PRIMARY color from the image
@@ -85,48 +140,6 @@ FIELDS
 
 Respond ONLY with a JSON object with keys: title, description, seoTitle, seoDescription,
 fabric, color, occasions, pattern, keywords, inferred.`
-
-// Generate concise ALT text for a product image (accessibility + image SEO).
-export async function generateAltText(imageDataUrl: string): Promise<string> {
-  if (!isAiEnabled()) throw new Error('OPENAI_API_KEY is not configured')
-  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
-
-  const res = await fetch(OPENAI_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You write concise, descriptive ALT text for e-commerce product images (for ' +
-            'accessibility and image SEO) for a premium ethnic-wear store selling sarees, ' +
-            'kurtis and lehengas. Describe the garment type, colour, fabric and notable details ' +
-            'in ONE natural sentence, max 125 characters. Plain text only. Do not start with ' +
-            '"image of" or "photo of". No quotes.',
-        },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: 'Write the ALT text for this product image.' },
-            { type: 'image_url', image_url: { url: imageDataUrl, detail: 'low' } },
-          ],
-        },
-      ],
-      temperature: 0.5,
-      max_tokens: 80,
-    }),
-  })
-
-  if (!res.ok) throw new Error(`OpenAI error ${res.status}`)
-  const data = await res.json()
-  const text = String(data?.choices?.[0]?.message?.content || '').trim().replace(/^["']|["']$/g, '')
-  return text.slice(0, 160)
-}
 
 export async function generateProductListing(input: {
   notes?: string

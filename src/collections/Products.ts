@@ -88,11 +88,40 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      name: 'images',
+      name: 'colors',
       type: 'array',
-      labels: { singular: 'Image', plural: 'Images' },
+      minRows: 1,
+      required: true,
+      labels: { singular: 'Color', plural: 'Colors' },
+      admin: {
+        description:
+          'Add each color of this design. For each color, upload its photos and tick ONE as Default (shown first). For a single-color item, just add one color.',
+      },
       fields: [
-        { name: 'image', type: 'upload', relationTo: 'media', required: true },
+        {
+          type: 'row',
+          fields: [
+            { name: 'name', type: 'text', required: true, admin: { width: '60%', description: 'e.g. Emerald Green' } },
+            { name: 'available', type: 'checkbox', defaultValue: true, admin: { width: '30%', description: 'Untick = sold out' } },
+          ],
+        },
+        {
+          name: 'images',
+          type: 'array',
+          minRows: 1,
+          required: true,
+          labels: { singular: 'Photo', plural: 'Photos' },
+          admin: { description: 'Upload one or more photos for this color. Tick one as Default.' },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                { name: 'image', type: 'upload', relationTo: 'media', required: true, admin: { width: '70%' } },
+                { name: 'default', type: 'checkbox', admin: { width: '30%', description: 'Show first' } },
+              ],
+            },
+          ],
+        },
       ],
     },
     {

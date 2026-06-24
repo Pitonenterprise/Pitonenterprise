@@ -45,7 +45,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderNum
       (it: any) => `
       <tr>
         <td class="sku">${esc(skuMap[String(it.product)] || '—')}</td>
-        <td>${esc(it.title)}${it.size ? ` <span class="muted">· ${esc(it.size)}</span>` : ''}</td>
+        <td>${esc(it.title)}${it.color ? ` <span class="muted">· ${esc(it.color)}</span>` : ''}${it.size ? ` <span class="muted">· ${esc(it.size)}</span>` : ''}</td>
         <td class="c">${esc(it.quantity)}</td>
         <td class="r">${esc(formatINR(it.unitPrice || 0))}</td>
         <td class="r">${esc(formatINR((it.unitPrice || 0) * (it.quantity || 1)))}</td>

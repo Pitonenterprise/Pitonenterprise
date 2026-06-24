@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ProductGallery } from '@/components/ProductGallery'
-import { AddToCartButton } from '@/components/AddToCartButton'
-import { WishlistButton } from '@/components/WishlistButton'
+import { ProductBuyArea } from '@/components/ProductBuyArea'
 import { ProductCard } from '@/components/ProductCard'
 import { getProductBySlug, getProducts } from '@/lib/queries'
-import { Price } from '@/components/Price'
 
 export const revalidate = 120
 
@@ -44,7 +41,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     : []
 
   const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
-  const onSale = product.compareAtPrice && product.compareAtPrice > product.price
 
   // Product structured data (see Doc/SEO.md).
   const jsonLd = {
@@ -111,48 +107,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <span className="text-foreground">{product.title}</span>
       </nav>
 
-      <div className="grid gap-10 md:grid-cols-2 md:gap-16">
-        <ProductGallery images={product.images} accentColor={product.accentColor} title={product.title} />
-
-        <div className="md:py-4">
-          {product.categoryTitle && (
-            <p className="text-[11px] uppercase tracking-[3px] text-gold">{product.categoryTitle}</p>
-          )}
-          <h1 className="mt-3 font-display text-4xl leading-tight text-foreground md:text-5xl">
-            {product.title}
-          </h1>
-
-          <div className="mt-4 flex items-center gap-3">
-            <Price inr={product.price} className="text-2xl text-wine" />
-            {onSale && (
-              <Price inr={product.compareAtPrice!} className="text-base text-muted line-through" />
-            )}
-            {product.badge && (
-              <span className="bg-gold-soft/50 px-3 py-1 text-[10px] uppercase tracking-[2px] text-wine">
-                {product.badge}
-              </span>
-            )}
-          </div>
-
-          <div className="mt-8">
-            <AddToCartButton
-              item={{
-                productId: product.id,
-                slug: product.slug,
-                title: product.title,
-                price: product.price,
-                image: product.image?.url ?? null,
-                accentColor: product.accentColor ?? null,
-              }}
-              sizes={product.sizes}
-            />
-          </div>
-
-          <div className="mt-5 flex items-center gap-3 text-sm text-muted">
-            <WishlistButton productId={product.id} className="!static opacity-100" />
-            <span>Save to wishlist</span>
-          </div>
-
+      <ProductBuyArea
+        product={{
+          id: product.id,
+          slug: product.slug,
+          title: product.title,
+          price: product.price,
+          compareAtPrice: product.compareAtPrice,
+          badge: product.badge,
+          categoryTitle: product.categoryTitle,
+          accentColor: product.accentColor,
+          image: product.image,
+          images: product.images,
+          colors: product.colors ?? [],
+          sizes: product.sizes,
+        }}
+      >
+        <div>
           {/* Description */}
           {typeof product.description === 'string' && product.description.trim() && (
             <div className="mt-10 space-y-4 border-t border-line pt-8 text-[15px] leading-[1.9] text-foreground/80">
@@ -180,7 +151,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <dd className="text-foreground">{product.fabric}</dd>
               </div>
             )}
-            {product.color && (
+            {product.color && (!product.colors || product.colors.length === 0) && (
               <div className="flex gap-4">
                 <dt className="w-32 uppercase tracking-[1.5px] text-muted">Colour</dt>
                 <dd className="text-foreground">{product.color}</dd>
@@ -200,7 +171,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             )}
           </dl>
         </div>
-      </div>
+      </ProductBuyArea>
 
       {/* Related */}
       {related.length > 0 && (

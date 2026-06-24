@@ -125,7 +125,7 @@ export default async function OrderDetailPage({
             {(order.items || []).map((it: any, i: number) => (
               <li key={i} className="flex justify-between gap-3">
                 <span className="text-foreground">
-                  {it.title}{it.size ? ` · ${it.size}` : ''} × {it.quantity}
+                  {it.title}{it.color ? ` · ${it.color}` : ''}{it.size ? ` · ${it.size}` : ''} × {it.quantity}
                 </span>
                 <span>{formatINR((it.unitPrice || 0) * (it.quantity || 1))}</span>
               </li>

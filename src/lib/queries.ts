@@ -25,6 +25,9 @@ export type StoreProduct = {
   occasions?: string[]
   careInstructions?: string | null
   updatedAt?: string | null
+  // Color variants shown on a single product page. Each color has its own photos
+  // (default photo first). Single-color products simply have one color.
+  colors?: { name: string; available: boolean; images: StoreImage[] }[]
 }
 
 export type StoreCategory = {
@@ -46,9 +49,22 @@ function toImage(img: unknown): StoreImage {
 }
 
 function mapProduct(doc: Record<string, any>): StoreProduct {
-  const images: StoreImage[] = Array.isArray(doc.images)
-    ? doc.images.map((row: any) => toImage(row?.image)).filter(Boolean)
+  // Each color has its own photos; the one flagged `default` is shown first.
+  const colors = Array.isArray(doc.colors)
+    ? doc.colors
+        .filter((c: any) => c?.name)
+        .map((c: any) => {
+          const photos: any[] = Array.isArray(c.images) ? c.images : []
+          const ordered = [...photos].sort((a, b) => (b?.default ? 1 : 0) - (a?.default ? 1 : 0))
+          return {
+            name: c.name,
+            available: c.available !== false,
+            images: ordered.map((row: any) => toImage(row?.image)).filter(Boolean) as StoreImage[],
+          }
+        })
     : []
+  // Primary thumbnail = the first color's default photo.
+  const primaryImages = colors[0]?.images ?? []
   const category = typeof doc.category === 'object' ? doc.category : null
   return {
     id: doc.id,
@@ -67,12 +83,13 @@ function mapProduct(doc: Record<string, any>): StoreProduct {
       : [],
     categorySlug: category?.slug ?? null,
     categoryTitle: category?.title ?? null,
-    image: images[0] ?? null,
-    images,
+    image: primaryImages[0] ?? null,
+    images: primaryImages,
     description: doc.description ?? null,
     occasions: doc.occasions ?? [],
     careInstructions: doc.careInstructions ?? null,
     updatedAt: doc.updatedAt ?? null,
+    colors,
   }
 }
 

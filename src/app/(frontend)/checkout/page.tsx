@@ -158,7 +158,7 @@ export default function CheckoutPage() {
           email: form.email,
           method,
           draftOrderNumber: draftOrder || undefined,
-          items: cart.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
+          items: cart.map((i) => ({ productId: i.productId, size: i.size, color: i.color, quantity: i.quantity })),
           shippingAddress: {
             name: form.name, phone: form.phone, line1: form.line1, line2: form.line2,
             city: form.city, state: form.state, postalCode: form.postalCode, country: form.country,
