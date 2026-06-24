@@ -2,6 +2,15 @@
 
 > Running log of notable changes, newest first. Update with every meaningful change.
 
+## 2026-06-23 (bugfix: product create failing in production)
+- **Fixed product create throwing "Not Found" on save.** The `Products` `afterChange` SKU
+  auto-assign hook ran its nested `payload.update` **without passing `req`**, so it executed in
+  a separate transaction that could not see the just-inserted (still-uncommitted) row and threw
+  `Not Found`, rolling back the whole create. Now passes `req` so the update joins the create's
+  transaction (and reflects the generated SKU on the returned doc). See `src/collections/Products.ts`.
+  Reminder: any nested write that must read a row created earlier in the same request **must pass
+  `req`** to share the transaction.
+
 ## 2026-06-20 (checkout, orders, receipts, product IDs, polish)
 - **Login required to order.** `/api/checkout` rejects guests (`401 login_required`) and links
   the order to the customer; checkout page checks auth, prefills from the account, and redirects
