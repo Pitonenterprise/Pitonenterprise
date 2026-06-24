@@ -1,8 +1,16 @@
 import type { CollectionConfig } from 'payload'
 import { generateAltText, isAiEnabled } from '../lib/ai'
+import { slugify } from '../fields/slug'
 
-// Uploaded media (product images, etc.). Stored locally for now; a Supabase Storage
-// (S3-compatible) adapter will be wired in a later phase, see Doc/DATA_MODEL.md.
+// Build a descriptive, SEO-friendly filename from the AI alt text.
+function filenameFromAlt(alt: string, originalName?: string): string {
+  const rawExt = (originalName?.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const ext = rawExt || 'jpg'
+  const base = slugify(alt).split('-').filter(Boolean).slice(0, 7).join('-').slice(0, 60)
+  return `${base || 'product-image'}.${ext}`
+}
+
+// Uploaded media (product images). Stored in Supabase Storage (see payload.config storage).
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
@@ -12,13 +20,41 @@ export const Media: CollectionConfig = {
     group: 'Catalog',
   },
   hooks: {
-    // Auto-generate ALT text from the uploaded image via AI when it's left blank.
+    // On upload, do ONE AI vision pass to (a) name the file descriptively and (b) stash the
+    // alt for beforeValidate. Runs before the file + its resized versions are generated.
+    beforeOperation: [
+      async ({ args, operation, req }) => {
+        const file = (req as any).file as { name?: string; data?: Buffer; mimetype?: string } | undefined
+        if ((operation === 'create' || operation === 'update') && file?.data && isAiEnabled()) {
+          try {
+            const dataUrl = `data:${file.mimetype || 'image/jpeg'};base64,${file.data.toString('base64')}`
+            const alt = await generateAltText({ imageDataUrl: dataUrl })
+            if (alt) {
+              ;(req as any).context = { ...((req as any).context || {}), generatedAlt: alt }
+              // Rename the upload to a descriptive, keyword-rich filename (Payload dedupes clashes).
+              file.name = filenameFromAlt(alt, file.name)
+            }
+          } catch {
+            // Non-fatal: keep the original filename; alt can be generated/typed later.
+          }
+        }
+        return args
+      },
+    ],
+    // Apply the alt generated above (or generate now as a fallback) when it's blank.
     beforeValidate: [
       async ({ data, req, operation }) => {
         if (!data) return data
-        const incoming = (req as any).file as { data?: Buffer; mimetype?: string } | undefined
         const needsAlt = !data.alt || (typeof data.alt === 'string' && data.alt.trim() === '')
-        if ((operation === 'create' || operation === 'update') && needsAlt && incoming?.data && isAiEnabled()) {
+        if (!needsAlt) return data
+
+        const stashed = (req as any).context?.generatedAlt
+        if (stashed) {
+          data.alt = stashed
+          return data
+        }
+        const incoming = (req as any).file as { data?: Buffer; mimetype?: string } | undefined
+        if ((operation === 'create' || operation === 'update') && incoming?.data && isAiEnabled()) {
           try {
             const dataUrl = `data:${incoming.mimetype || 'image/jpeg'};base64,${incoming.data.toString('base64')}`
             const alt = await generateAltText({ imageDataUrl: dataUrl })
