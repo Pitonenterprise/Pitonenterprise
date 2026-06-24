@@ -21,13 +21,19 @@ export const Products: CollectionConfig = {
       // Auto-assign a Product ID (SKU) on creation if none was entered.
       async ({ doc, operation, req, context }) => {
         if (operation === 'create' && !doc.sku && !(context as { skipSku?: boolean })?.skipSku) {
+          const sku = `PE-${String(doc.id).padStart(5, '0')}`
           await req.payload.update({
             collection: 'products',
             id: doc.id,
-            data: { sku: `PE-${String(doc.id).padStart(5, '0')}` },
+            data: { sku },
             overrideAccess: true,
+            // Share the create's transaction so the just-inserted row is visible.
+            // Without `req` this update runs in a separate transaction and throws
+            // "Not Found" (the row is still uncommitted), aborting the whole create.
+            req,
             context: { skipSku: true },
           })
+          doc.sku = sku
         }
         return doc
       },
