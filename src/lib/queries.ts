@@ -34,8 +34,18 @@ export type StoreCategory = {
   id: string | number
   title: string
   slug: string
-  description?: string | null
+  seoTitle?: string | null
+  seoDescription?: string | null
   accentColor?: string | null
+  image: StoreImage
+  updatedAt?: string | null
+}
+
+export type StoreCollection = {
+  id: string | number
+  title: string
+  slug: string
+  description?: string | null
   image: StoreImage
   updatedAt?: string | null
 }
@@ -98,7 +108,8 @@ function mapCategory(doc: Record<string, any>): StoreCategory {
     id: doc.id,
     title: doc.title,
     slug: doc.slug,
-    description: doc.description ?? null,
+    seoTitle: doc.seo?.metaTitle ?? null,
+    seoDescription: doc.seo?.metaDescription ?? null,
     accentColor: doc.accentColor ?? null,
     image: toImage(doc.image),
     updatedAt: doc.updatedAt ?? null,
@@ -111,7 +122,9 @@ export const getCategories = cache(async (): Promise<StoreCategory[]> => {
   const payload = await getPayloadClient()
   const res = await payload.find({
     collection: 'categories',
-    sort: 'order',
+    // Lower "order" first; ties fall back to creation order (older first) so the
+    // lineup is always predictable even when two categories share the same number.
+    sort: ['order', 'createdAt'],
     limit: 50,
     depth: 1,
     overrideAccess: true,
@@ -131,8 +144,44 @@ export const getCategoryBySlug = cache(async (slug: string): Promise<StoreCatego
   return res.docs[0] ? mapCategory(res.docs[0]) : null
 })
 
+function mapCollection(doc: Record<string, any>): StoreCollection {
+  return {
+    id: doc.id,
+    title: doc.title,
+    slug: doc.slug,
+    description: doc.description ?? null,
+    image: toImage(doc.image),
+    updatedAt: doc.updatedAt ?? null,
+  }
+}
+
+export const getCollections = cache(async (): Promise<StoreCollection[]> => {
+  const payload = await getPayloadClient()
+  const res = await payload.find({
+    collection: 'collections',
+    sort: 'order',
+    limit: 100,
+    depth: 1,
+    overrideAccess: true,
+  })
+  return res.docs.map(mapCollection)
+})
+
+export const getCollectionBySlug = cache(async (slug: string): Promise<StoreCollection | null> => {
+  const payload = await getPayloadClient()
+  const res = await payload.find({
+    collection: 'collections',
+    where: { slug: { equals: slug } },
+    limit: 1,
+    depth: 1,
+    overrideAccess: true,
+  })
+  return res.docs[0] ? mapCollection(res.docs[0]) : null
+})
+
 type ProductQuery = {
   categorySlug?: string
+  collectionSlug?: string
   search?: string
   sort?: 'newest' | 'price-asc' | 'price-desc'
   limit?: number
@@ -154,6 +203,7 @@ export async function getProducts(q: ProductQuery = {}): Promise<{
   const payload = await getPayloadClient()
   const where: Record<string, any> = { status: { equals: 'active' } }
   if (q.categorySlug) where['category.slug'] = { equals: q.categorySlug }
+  if (q.collectionSlug) where['collections.slug'] = { equals: q.collectionSlug }
   if (q.search) where.title = { like: q.search }
 
   const res = await payload.find({

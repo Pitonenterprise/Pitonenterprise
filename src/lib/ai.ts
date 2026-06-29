@@ -141,6 +141,53 @@ FIELDS
 Respond ONLY with a JSON object with keys: title, description, seoTitle, seoDescription,
 fabric, color, occasions, pattern, keywords, inferred.`
 
+// Generate SEO meta title + meta description for a category page (hidden in <head>).
+export async function generateCategorySeo(input: {
+  title: string
+  kind?: string // "category" | "collection"
+}): Promise<{ metaTitle: string; metaDescription: string }> {
+  if (!isAiEnabled()) throw new Error('OPENAI_API_KEY is not configured')
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  const kind = input.kind || 'category'
+
+  const system = `You write SEO metadata for ${kind} pages of a premium worldwide ethnic-wear
+store called "Piton Enterprise" (sarees, kurtis, lehengas, ethnic wear). Given the ${kind} name,
+return:
+- "metaTitle": <= 60 characters, keyword-rich, natural. May end with " | Piton Enterprise" only
+  if it still fits 60 chars.
+- "metaDescription": <= 155 characters, compelling and keyword-rich; encourage the shopper and
+  mention handcrafted/worldwide shipping where natural. No quotes, no emojis.
+American spelling; keep ethnic terms (saree, kurti, lehenga). Respond ONLY with JSON:
+{ "metaTitle": "...", "metaDescription": "..." }`
+
+  const res = await fetch(OPENAI_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: `${kind[0].toUpperCase() + kind.slice(1)} name: ${input.title}` },
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.6,
+      max_tokens: 200,
+    }),
+  })
+  if (!res.ok) throw new Error(`OpenAI error ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  const data = await res.json()
+  let parsed: any = {}
+  try {
+    parsed = JSON.parse(data?.choices?.[0]?.message?.content || '{}')
+  } catch {
+    throw new Error('OpenAI returned invalid JSON')
+  }
+  return {
+    metaTitle: String(parsed.metaTitle || '').trim().slice(0, 70),
+    metaDescription: String(parsed.metaDescription || '').trim().slice(0, 165),
+  }
+}
+
 export async function generateProductListing(input: {
   notes?: string
   imageDataUrl?: string

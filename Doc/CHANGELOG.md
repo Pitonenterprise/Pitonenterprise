@@ -2,6 +2,33 @@
 
 > Running log of notable changes, newest first. Update with every meaningful change.
 
+## 2026-06-29 (Collections, Categories AI-SEO, display-order clarity) — pending push
+- **New `Collections` collection** — themed, cross-category groupings (Diwali, Holi…). A product
+  can belong to many via a new `products.collections` relation. Storefront `/collections` (index)
+  and `/collections/[slug]` (landing). Added to nav, sitemap, and `lib/queries.ts`
+  (`getCollections`, `getCollectionBySlug`, `collectionSlug` filter on `getProducts`).
+- **Categories AI-SEO.** Removed the visible `description` field (dropped `categories_locales.
+  description`). Added an **AI SEO** button (`/admin/AICategorySeoAssistant`) that fills
+  `seo.metaTitle` + `seo.metaDescription` from the title via `generateCategorySeo`
+  (`/api/ai/generate-category-seo`, admin-guarded). Category page metadata now reads the SEO
+  group; homepage/category eyebrows that showed the old description were removed.
+- **Clear category-delete error.** `Categories.beforeDelete` throws a friendly `APIError` when
+  products still reference the category, instead of a raw 500 FK error.
+- **"Display order" clarity.** Relabeled `order` → "Display order" with help text explaining it
+  controls position (not product count); ties now fall back to creation order
+  (`sort: ['order','createdAt']`) so same-number categories are deterministic.
+
+## 2026-06-23 (color variants, unified photos, AI alt + filenames, observability)
+- **Single-page color variants (unified photos model).** Each product has a `colors` array; each
+  colour holds its own `images` (one marked **default**, shown first). Selecting a colour on the
+  product page swaps the gallery. Dropped the separate top-level images array and the per-product
+  `product_groups` experiment. `slug` is now read-only (derived from title).
+- **AI alt text + auto-rename on upload.** One vision call per upload generates SEO alt text and
+  renames the file to a descriptive slug (`src/collections/Media.ts`, `lib/ai.ts`,
+  `/api/ai/generate-alt`). The product AI assistant also backfills alt for every photo.
+- **Observability.** `payload.config` `afterError` hook logs every Payload error (with DB `cause`
+  + stack) to stdout so failures are visible in Vercel logs.
+
 ## 2026-06-23 (bugfix: product create failing in production)
 - **Fixed product create throwing "Not Found" on save.** The `Products` `afterChange` SKU
   auto-assign hook ran its nested `payload.update` **without passing `req`**, so it executed in

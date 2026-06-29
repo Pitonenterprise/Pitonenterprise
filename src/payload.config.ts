@@ -11,6 +11,7 @@ import { supabaseStorageAdapter } from './lib/supabaseStorageAdapter'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Categories } from './collections/Categories'
+import { Collections } from './collections/Collections'
 import { Products } from './collections/Products'
 import { Customers } from './collections/Customers'
 import { Orders } from './collections/Orders'
@@ -69,7 +70,7 @@ export default buildConfig({
       },
     ],
   },
-  collections: [Products, Categories, Orders, Customers, Messages, Media, Users],
+  collections: [Products, Categories, Collections, Orders, Customers, Messages, Media, Users],
   globals: [Settings],
   plugins: storagePlugins,
   editor: lexicalEditor(),

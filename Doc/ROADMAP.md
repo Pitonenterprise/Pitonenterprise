@@ -14,7 +14,8 @@ Legend: ✅ done · 🟡 in progress · ⬜ not started
 - ⬜ Resolve `payload generate:types` CLI issue (ERR_REQUIRE_ASYNC_MODULE on Node 20.20)
 
 ## Phase 1 — Catalog & CMS ✅
-- ✅ Payload collections: Products, Categories, Media, Users, Customers, Orders + Settings
+- ✅ Payload collections: Products, Categories, Collections, Media, Users, Customers, Orders + Settings
+- ✅ Collections (themed cross-category groupings) + `/collections` storefront pages
 - ✅ Seed sample sarees/dresses (4 categories, 12 products via `/api/seed`)
 - ✅ Storefront: home, product listing, product detail (ISR)
 - ✅ Search; sort + pagination (price/color/fabric facet filters = future enhancement)
@@ -45,7 +46,8 @@ Legend: ✅ done · 🟡 in progress · ⬜ not started
 - ✅ Customer accounts (auth + email OTP verification); order history + detail + receipts
 - ✅ Account-synced cart + wishlist across devices
 - ✅ Email via Resend (OTP, contact notifications) — order-confirmation emails = future
-- ✅ AI Listing Assistant (OpenAI) for products + auto alt-text on media uploads
+- ✅ AI everywhere (OpenAI): product listing assistant, auto alt-text + SEO-friendly auto-rename
+  on media upload, and category SEO meta-title/description generator
 - ⬜ Addresses management UI; password reset
 
 ## Current focus

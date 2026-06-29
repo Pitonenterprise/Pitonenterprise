@@ -147,7 +147,17 @@ export const Products: CollectionConfig = {
       type: 'relationship',
       relationTo: 'categories',
       required: true,
-      admin: { position: 'sidebar' },
+      admin: { position: 'sidebar', description: 'The garment type (one). This drives the main nav.' },
+    },
+    {
+      name: 'collections',
+      type: 'relationship',
+      relationTo: 'collections',
+      hasMany: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Themed/seasonal edits this product belongs to (e.g. Diwali, Bridal). Optional, pick many.',
+      },
     },
     {
       name: 'sizes',

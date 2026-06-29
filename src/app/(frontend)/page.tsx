@@ -96,9 +96,6 @@ export default async function Home() {
                 <span className="font-display text-2xl text-foreground transition group-hover:text-wine">
                   {c.title}
                 </span>
-                {c.description && (
-                  <span className="text-[11px] uppercase tracking-[2px] text-muted">{c.description}</span>
-                )}
               </Link>
             ))}
           </div>
@@ -111,10 +108,7 @@ export default async function Home() {
           <div className="mx-auto max-w-[1280px] px-6 py-16 md:px-8">
             <div className="mb-8 flex items-end justify-between">
               <div>
-                {category.description && (
-                  <p className="text-[11px] uppercase tracking-[4px] text-gold">{category.description}</p>
-                )}
-                <h2 className="mt-2 font-display text-4xl text-foreground">{category.title}</h2>
+                <h2 className="font-display text-4xl text-foreground">{category.title}</h2>
               </div>
               <Link
                 href={`/products/category/${category.slug}`}
