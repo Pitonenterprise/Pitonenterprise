@@ -84,13 +84,16 @@ export default async function Home() {
       {/* ===== Category strip ===== */}
       {categories.length > 0 && (
         <section className="border-y border-line bg-background">
-          <div className="mx-auto grid max-w-[1280px] grid-cols-2 md:grid-cols-4">
+          <div
+            className="mx-auto grid max-w-[1280px] grid-cols-2 md:[grid-template-columns:repeat(var(--cat-cols),minmax(0,1fr))]"
+            style={{ '--cat-cols': Math.min(categories.length, 6) } as React.CSSProperties}
+          >
             {categories.map((c, i) => (
               <Link
                 key={c.slug}
                 href={`/products/category/${c.slug}`}
                 className={`group flex flex-col items-center gap-1 border-line px-6 py-10 text-center transition hover:bg-gold-soft/30 ${
-                  i % 2 === 0 ? 'border-r' : ''
+                  i % 2 === 0 ? 'border-r md:border-r-0' : ''
                 } ${i < 2 ? 'border-b md:border-b-0' : ''} md:[&:not(:last-child)]:border-r`}
               >
                 <span className="font-display text-2xl text-foreground transition group-hover:text-wine">
