@@ -84,12 +84,12 @@ export default async function Home() {
       {/* ===== Category strip ===== */}
       {categories.length > 0 && (
         <section className="border-y border-line bg-background">
-          <div className="mx-auto grid max-w-[1280px] grid-cols-2 md:grid-cols-none md:auto-cols-fr md:grid-flow-col">
+          <div className="mx-auto grid max-w-[1280px] grid-cols-2 md:flex">
             {categories.map((c, i) => (
               <Link
                 key={c.slug}
                 href={`/products/category/${c.slug}`}
-                className={`group flex flex-col items-center gap-1 border-line px-6 py-10 text-center transition hover:bg-gold-soft/30 ${
+                className={`group flex flex-1 flex-col items-center gap-1 border-line px-6 py-10 text-center transition hover:bg-gold-soft/30 ${
                   i % 2 === 0 ? 'border-r md:border-r-0' : ''
                 } ${i < 2 ? 'border-b md:border-b-0' : ''} md:[&:not(:last-child)]:border-r`}
               >
