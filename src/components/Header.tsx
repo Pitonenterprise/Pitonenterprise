@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { CartBadge } from './CartBadge'
 import { CurrencySwitcher } from './CurrencySwitcher'
-import { getCategories } from '@/lib/queries'
+import { getCategories, getCollections } from '@/lib/queries'
 
 function IconButton({
   label,
@@ -27,9 +27,62 @@ function IconButton({
 const linkClass =
   'text-[12.5px] uppercase tracking-[1.5px] text-foreground transition hover:text-wine'
 
+// A top-level nav item that reveals a list of links on hover/focus (CSS only).
+// The trigger itself is a real link (e.g. "Shop" -> /products).
+function NavDropdown({
+  label,
+  href,
+  items,
+}: {
+  label: string
+  href: string
+  items: { label: string; href: string }[]
+}) {
+  if (items.length === 0) {
+    return (
+      <Link href={href} className={linkClass}>
+        {label}
+      </Link>
+    )
+  }
+  return (
+    <div className="group relative">
+      <Link href={href} className={`${linkClass} inline-flex items-center gap-1`} aria-haspopup="true">
+        {label}
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          className="mt-0.5 transition group-hover:rotate-180"
+        >
+          <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </Link>
+
+      {/* pt-3 bridges the gap so the menu stays open while moving the cursor down */}
+      <div className="invisible absolute left-0 top-full pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        <div className="min-w-[230px] overflow-hidden rounded-md border border-line bg-background py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.12)]">
+          {items.map((it) => (
+            <Link
+              key={it.href}
+              href={it.href}
+              className="block px-5 py-2.5 text-[12.5px] tracking-[0.5px] text-foreground transition hover:bg-gold-soft/40 hover:text-wine"
+            >
+              {it.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export async function Header() {
-  // Categories are pulled live from the CMS, so the nav always matches the store.
-  const categories = await getCategories()
+  // Categories + collections are pulled live from the CMS, so the nav always matches the store.
+  const [categories, collections] = await Promise.all([getCategories(), getCollections()])
 
   return (
     <>
@@ -47,52 +100,24 @@ export async function Header() {
               Home
             </Link>
 
-            {/* Shop dropdown — lists live categories */}
-            {categories.length > 0 ? (
-              <div className="group relative">
-                <Link
-                  href="/products"
-                  className={`${linkClass} inline-flex items-center gap-1`}
-                  aria-haspopup="true"
-                >
-                  Shop
-                  <svg
-                    width="10"
-                    height="10"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    className="mt-0.5 transition group-hover:rotate-180"
-                  >
-                    <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </Link>
+            <NavDropdown
+              label="Shop"
+              href="/products"
+              items={categories.map((c) => ({
+                label: c.title,
+                href: `/products/category/${c.slug}`,
+              }))}
+            />
 
-                {/* pt-3 bridges the gap so the menu stays open while moving the cursor down */}
-                <div className="invisible absolute left-0 top-full pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                  <div className="min-w-[230px] overflow-hidden rounded-md border border-line bg-background py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.12)]">
-                    {categories.map((c) => (
-                      <Link
-                        key={c.slug}
-                        href={`/products/category/${c.slug}`}
-                        className="block px-5 py-2.5 text-[12.5px] tracking-[0.5px] text-foreground transition hover:bg-gold-soft/40 hover:text-wine"
-                      >
-                        {c.title}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Link href="/products" className={linkClass}>
-                Shop
-              </Link>
-            )}
+            <NavDropdown
+              label="Collections"
+              href="/collections"
+              items={collections.map((c) => ({
+                label: c.title,
+                href: `/collections/${c.slug}`,
+              }))}
+            />
 
-            <Link href="/collections" className={linkClass}>
-              Collections
-            </Link>
             <Link href="/about" className={linkClass}>
               About
             </Link>
