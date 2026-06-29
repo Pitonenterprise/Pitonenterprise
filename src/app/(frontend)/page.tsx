@@ -56,10 +56,10 @@ export default async function Home() {
                 Shop the Edit
               </Link>
               <Link
-                href="/products/category/lehengas"
+                href={categories[0] ? `/products/category/${categories[0].slug}` : '/collections'}
                 className="rounded-full border border-foreground/20 px-8 py-3.5 text-[12px] uppercase tracking-[1.5px] text-foreground transition hover:border-wine hover:text-wine"
               >
-                Bridal Lehengas
+                {categories[0] ? categories[0].title : 'Collections'}
               </Link>
             </div>
           </div>

@@ -1,15 +1,7 @@
 import Link from 'next/link'
+import { getCategories } from '@/lib/queries'
 
-const COLUMNS = [
-  {
-    title: 'Shop',
-    links: [
-      { label: 'Sarees', href: '/products/category/sarees' },
-      { label: 'Kurtis', href: '/products/category/kurtis' },
-      { label: 'Lehengas', href: '/products/category/lehengas' },
-      { label: 'Western', href: '/products/category/western' },
-    ],
-  },
+const STATIC_COLUMNS = [
   {
     title: 'Help',
     links: [
@@ -22,12 +14,26 @@ const COLUMNS = [
     title: 'About',
     links: [
       { label: 'Our Story', href: '/about' },
-      { label: 'Contact Us', href: '/contact' },
+      { label: 'Collections', href: '/collections' },
     ],
   },
 ]
 
-export function Footer() {
+export async function Footer() {
+  // Shop column is built from live categories so it always matches the store.
+  const categories = await getCategories()
+  const shopColumn = {
+    title: 'Shop',
+    links: [
+      ...categories.slice(0, 6).map((c) => ({
+        label: c.title,
+        href: `/products/category/${c.slug}`,
+      })),
+      { label: 'Collections', href: '/collections' },
+    ],
+  }
+  const COLUMNS = [shopColumn, ...STATIC_COLUMNS]
+
   return (
     <footer className="mt-24 bg-wine-deep text-gold-soft print:hidden">
       {/* Newsletter */}
