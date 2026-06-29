@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ProductCard } from '@/components/ProductCard'
-import { HeroSlideshow } from '@/components/HeroSlideshow'
+import { HeroBanner } from '@/components/HeroBanner'
 import { getCategories, getFeaturedByCategory } from '@/lib/queries'
 import { getPayloadClient } from '@/lib/payload'
 
@@ -36,50 +36,8 @@ export default async function Home() {
 
   return (
     <main>
-      {/* ===== Hero ===== */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 py-16 md:grid-cols-2 md:px-8 md:py-24">
-          <div className="animate-[pfade_0.7s_ease]">
-            <p className="text-[11px] uppercase tracking-[4px] text-gold">The Festive Edit · 2026</p>
-            <h1 className="mt-5 font-display text-5xl leading-[1.05] text-foreground md:text-[64px]">
-              Where tradition meets<br />
-              <span className="text-wine">timeless beauty</span>
-            </h1>
-            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-foreground/70">
-              Handcrafted sarees, kurtis and lehengas from India&apos;s finest weavers,               shipped, with love, anywhere in the world.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                href="/products"
-                className="rounded-full bg-wine px-8 py-3.5 text-[12px] uppercase tracking-[1.5px] text-white transition hover:bg-wine-deep"
-              >
-                Shop the Edit
-              </Link>
-              <Link
-                href={categories[0] ? `/products/category/${categories[0].slug}` : '/collections'}
-                className="rounded-full border border-foreground/20 px-8 py-3.5 text-[12px] uppercase tracking-[1.5px] text-foreground transition hover:border-wine hover:text-wine"
-              >
-                {categories[0] ? categories[0].title : 'Collections'}
-              </Link>
-            </div>
-          </div>
-
-          <div className="relative h-[360px] md:h-[520px]">
-            {heroImages.length > 0 ? (
-              <div className="absolute right-0 top-0 h-[78%] w-[62%]">
-                <HeroSlideshow images={heroImages} />
-              </div>
-            ) : (
-              <div className="absolute right-0 top-0 h-[78%] w-[62%] rounded-sm" style={{ background: 'linear-gradient(150deg,#6e1f3b,#4a1228)' }} />
-            )}
-            <div className="absolute bottom-0 left-0 h-[62%] w-[52%] rounded-sm border-8 border-background" style={{ background: 'linear-gradient(150deg,#e8d7b8,#b68a3e)' }} />
-            <div className="absolute bottom-6 right-6 rounded-sm bg-background/95 px-5 py-4 text-center shadow-sm">
-              <div className="font-display text-2xl text-wine">120+</div>
-              <div className="text-[10px] uppercase tracking-[2px] text-muted">Master weaves</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ===== Hero banner (full-width horizontal carousel) ===== */}
+      <HeroBanner images={heroImages} />
 
       {/* ===== Category strip ===== */}
       {categories.length > 0 && (
