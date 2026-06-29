@@ -51,6 +51,24 @@ export default buildConfig({
       titleSuffix: ', Pitonenterprise Admin',
     },
   },
+  // Log info+ to stdout so it shows up in Vercel logs.
+  logger: { options: { level: 'info' } },
+  // Surface EVERY error (failed deletes included) with its underlying DB cause
+  // (e.g. foreign-key violations), so issues are debuggable from the Vercel logs.
+  hooks: {
+    afterError: [
+      ({ error, collection }) => {
+        const where = collection ? `collection "${collection.slug}"` : 'endpoint'
+        const cause = (error as { cause?: { detail?: string; message?: string; code?: string } })?.cause
+        const causeMsg = cause?.detail || cause?.message || cause?.code
+        console.error(
+          `[payload-error] ${where}: ${error?.name || 'Error'}: ${error?.message}` +
+            (causeMsg ? ` | cause: ${causeMsg}` : '') +
+            (error?.stack ? `\n${error.stack}` : ''),
+        )
+      },
+    ],
+  },
   collections: [Products, Categories, Orders, Customers, Messages, Media, Users],
   globals: [Settings],
   plugins: storagePlugins,
