@@ -84,10 +84,7 @@ export default async function Home() {
       {/* ===== Category strip ===== */}
       {categories.length > 0 && (
         <section className="border-y border-line bg-background">
-          <div
-            className="mx-auto grid max-w-[1280px] grid-cols-2 md:[grid-template-columns:repeat(var(--cat-cols),minmax(0,1fr))]"
-            style={{ '--cat-cols': Math.min(categories.length, 6) } as React.CSSProperties}
-          >
+          <div className="mx-auto grid max-w-[1280px] grid-cols-2 md:grid-cols-none md:auto-cols-fr md:grid-flow-col">
             {categories.map((c, i) => (
               <Link
                 key={c.slug}
